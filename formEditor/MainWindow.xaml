@@ -6,7 +6,17 @@
         xmlns:local="clr-namespace:formEditor"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+    <DockPanel>
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar>
+                <Button  Content="addItem" Click="Button_Click"/>
+                <Button Command="Open" Content="Open" />
+                <Button Command="Save" Content="Save" />
+            </ToolBar>
+            
+        </ToolBarTray>
+        <Grid Name="LayoutRoot" Background="Beige"></Grid>
+    </DockPanel>
+    
+   
 </Window>

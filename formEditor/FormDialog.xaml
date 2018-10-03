@@ -1,0 +1,203 @@
+﻿<Window x:Class="formEditor.FormDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:formEditor"
+        mc:Ignorable="d"
+        Height="500"
+    Width="500"
+    MinHeight="10"
+    MinWidth="300"
+    ResizeMode="CanResizeWithGrip"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner" 
+        Title="FormDialog" >
+    <Window.Resources>
+        <Style x:Key="MyWaterMarkStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Grid>
+                            <Border Background="White" BorderBrush="#FF7D8683" BorderThickness="1"/>
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="5,0,0,0" VerticalAlignment="Center" />
+                            <Label Margin="5,0,0,0" x:Name="WaterMarkLabel" Content="{TemplateBinding Tag}" VerticalAlignment="Center"
+                               Visibility="Collapsed" Foreground="Gray" FontFamily="Arial"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Text" Value=""/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Visibility" TargetName="WaterMarkLabel" Value="Visible"/>
+                            </MultiTrigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="DimGray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Name="rootGrid">
+        <TabControl HorizontalAlignment="Left"
+                    Height="299"
+                    Margin="10,10,0,0"
+                    VerticalAlignment="Top"
+                    Width="497"
+                    SelectionChanged="TabControl_SelectionChanged">
+            <TabItem Header="Type 1">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="68.333"></ColumnDefinition>
+                        <ColumnDefinition Width="7"/>
+                        <ColumnDefinition Width="127.667"/>
+                        <ColumnDefinition Width="20"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
+                        <ColumnDefinition Width="20"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
+
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="100"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TextBox Style="{StaticResource MyWaterMarkStyle}"
+                    HorizontalAlignment="Left"
+                               Margin="10,10,0,0"
+                               TextWrapping="Wrap"
+                             Name="Label1"
+                               Tag="enter text for label 1"
+                               VerticalAlignment="Top"
+                               Grid.Column ="0"
+                           Grid.Row="0" Grid.ColumnSpan="3"
+                              />
+                    <CheckBox IsChecked="True"  Grid.Column ="2"
+                           Grid.Row="0" Grid.ColumnSpan="2" Margin="127.667,0,0,0.333"></CheckBox>
+                    <TextBox Style="{StaticResource MyWaterMarkStyle}"
+                        HorizontalAlignment="Left"
+                              
+                               TextWrapping="Wrap"
+                               Tag="check 1 text"
+                              Name="Check1"
+                               VerticalAlignment="Top"
+                               Grid.Column ="4"
+                           Grid.Row="0"
+                              />
+
+                    <CheckBox IsChecked="True"  Grid.Column ="4"
+                           Grid.Row="0" Margin="81,0,0.666,0.333" Grid.ColumnSpan="2"></CheckBox>
+                    <TextBox Style="{StaticResource MyWaterMarkStyle}"
+                        HorizontalAlignment="Left"
+                              
+                               TextWrapping="Wrap"
+                               Tag="check 2 text"
+                             Name="Check2"
+                               VerticalAlignment="Top"
+                               Grid.Column ="5"
+                           Grid.Row="0" Grid.ColumnSpan="2" Margin="20.667,0,0,0"
+                              />
+
+                    <TextBox Style="{StaticResource MyWaterMarkStyle}"
+                        HorizontalAlignment="Left"
+                               Margin="10,9.667,0,0"
+                               TextWrapping="Wrap"
+                               Tag="enter text for label 2"
+                             Name="Label2"
+                               VerticalAlignment="Top"
+                               Grid.Column ="0"
+                           Grid.Row="1" Grid.ColumnSpan="3"
+                              />
+                    <Label 
+                        HorizontalAlignment="Right"
+                               Margin="0,10.333,10.666,0"
+                             
+                               Content="insert after line"
+                               VerticalAlignment="Top"
+                               Grid.Column ="2"
+                           Grid.Row="2"
+                                     
+                              />
+                    <TextBox  Style="{StaticResource MyWaterMarkStyle}"
+                        HorizontalAlignment="Left"
+                               Margin="10,10.333,0,0"
+                               TextWrapping="Wrap"
+                               Tag=" number"
+                             Name="Linenum"
+                               VerticalAlignment="Top"
+                               Grid.Column ="4"
+                           Grid.Row="2"
+                              />
+
+                    <Button Name="Next"  Grid.Column ="6" Height="60" VerticalAlignment="top"
+                           Grid.Row="2" Click="Next_Click" HorizontalAlignment="Right" Margin="0,0.333,-45,0" Width="46">Next</Button>
+                    <Button Name="Type1Done"  Grid.Column ="5" Height="60" VerticalAlignment="top"
+                           Grid.Row="2" Click="Type1Done_Click" HorizontalAlignment="Left" Grid.ColumnSpan="2" Margin="20.667,0.333,0,0" Width="46" >Done</Button>
+                </Grid>
+            </TabItem>
+            <TabItem Header="type 2">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="16.667"></ColumnDefinition>
+                        <ColumnDefinition Width="11.333"/>
+                        <ColumnDefinition Width="174.667"/>
+                        <ColumnDefinition Width="60"></ColumnDefinition>
+                        <ColumnDefinition Width="150"></ColumnDefinition>
+                        <ColumnDefinition Width="60"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="100"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TextBox Style="{StaticResource MyWaterMarkStyle}"
+                        HorizontalAlignment="Left"
+                               Margin="10,10,0,0"
+                               TextWrapping="Wrap"
+                               Tag="enter text for textbox 1"
+                               VerticalAlignment="Top"
+                               Grid.Column ="0"
+                           Grid.Row="0" Grid.ColumnSpan="3"
+                              />
+                    <Border BorderBrush="Black" BorderThickness="1"
+                                 Grid.Column ="2"
+                           Grid.Row="0" Grid.ColumnSpan="3" Margin="174,0,150.667,0.333"
+                              >
+                        <TextBlock  Text="user input"  VerticalAlignment="Top"></TextBlock>
+                    </Border>
+                    <TextBox Style="{StaticResource MyWaterMarkStyle}"
+                        HorizontalAlignment="Left"
+                               Margin="10.667,10,0,0"
+                               TextWrapping="Wrap"
+                               Tag="enter text for textbox 2"
+                               VerticalAlignment="Top"
+                               Grid.Column ="4"
+                           Grid.Row="0"
+                              />
+                    <Border BorderBrush="Black" BorderThickness="1"
+                                 Grid.Column ="5"
+                           Grid.Row="0" Margin="0.333,0,0,0.333">
+                        <TextBlock Text="user input"  VerticalAlignment="Top">
+                        </TextBlock>
+                    </Border>
+                    <TextBox Name="InsertAfter1" Style="{StaticResource MyWaterMarkStyle}"
+                        HorizontalAlignment="Left"
+                               Margin="10,10.333,0,0"
+                               TextWrapping="Wrap"
+                               Tag="insert after line"
+                               VerticalAlignment="Top"
+                               Grid.Column ="3"
+                           Grid.Row="2"
+                             Grid.ColumnSpan="2"
+                             
+                              />
+                    <Button   Grid.Column ="5" Height="60" VerticalAlignment="top"
+                           Grid.Row="2" Margin="0.333,0.333,0,0">Done</Button>
+
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
