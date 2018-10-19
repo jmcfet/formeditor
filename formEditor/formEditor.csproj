@@ -70,7 +70,28 @@
     <Compile Include="Migrations\201809291333211_number.Designer.cs">
       <DependentUpon>201809291333211_number.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201810082137130_morelabels.cs" />
+    <Compile Include="Migrations\201810082137130_morelabels.Designer.cs">
+      <DependentUpon>201810082137130_morelabels.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201810101624127_bold.cs" />
+    <Compile Include="Migrations\201810101624127_bold.Designer.cs">
+      <DependentUpon>201810101624127_bold.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201810111256315_addVaribles.cs" />
+    <Compile Include="Migrations\201810111256315_addVaribles.Designer.cs">
+      <DependentUpon>201810111256315_addVaribles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201810161418005_addBlocks.cs" />
+    <Compile Include="Migrations\201810161418005_addBlocks.Designer.cs">
+      <DependentUpon>201810161418005_addBlocks.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201810161426395_addBlocksreal.cs" />
+    <Compile Include="Migrations\201810161426395_addBlocksreal.Designer.cs">
+      <DependentUpon>201810161426395_addBlocksreal.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Block.cs" />
     <Compile Include="SharedCode.cs" />
     <Page Include="FormDialog.xaml">
       <SubType>Designer</SubType>
@@ -113,6 +134,21 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201809291333211_number.resx">
       <DependentUpon>201809291333211_number.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810082137130_morelabels.resx">
+      <DependentUpon>201810082137130_morelabels.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810101624127_bold.resx">
+      <DependentUpon>201810101624127_bold.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810111256315_addVaribles.resx">
+      <DependentUpon>201810111256315_addVaribles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810161418005_addBlocks.resx">
+      <DependentUpon>201810161418005_addBlocks.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810161426395_addBlocksreal.resx">
+      <DependentUpon>201810161426395_addBlocksreal.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

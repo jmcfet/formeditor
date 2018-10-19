@@ -5,18 +5,59 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:formEditor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <DockPanel>
-        <ToolBarTray DockPanel.Dock="Top">
-            <ToolBar>
-                <Button  Content="addItem" Click="Button_Click"/>
-                <Button Command="Open" Content="Open" />
-                <Button Command="Save" Content="Save" />
-            </ToolBar>
-            
-        </ToolBarTray>
-        <Grid Name="LayoutRoot" Background="Beige"></Grid>
-    </DockPanel>
-    
-   
+        Title="MainWindow" Height="700" Width="800">
+
+    <Grid  Background="#FF0C0C0C">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" >
+            <Grid.Background>
+
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFFFFFFF" Offset="1"/>
+                    <GradientStop Color="#FF5E5757"/>
+
+                </LinearGradientBrush>
+
+            </Grid.Background>
+            <StackPanel Orientation="Horizontal" Grid.Column="0">
+
+                <Label Content="Password"  Name="password" Width="75"  FontSize="15" />
+                <PasswordBox  Name="passwordBox1" Width="120" />
+                <Button Content=">" Name="passwordEntered" Width="36"  Click="passwordEntered_Click" />
+                <ComboBox   Name="BlockSelector"   Width="77" Margin="10,0,0,0" Visibility="Visible"  SelectionChanged ="BlockSelector_SelectionChanged" >
+
+                </ComboBox>
+                    <Button Content="Start"  Name="Start"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Start_Click"/>
+                
+                <Button Content="Add"  Name="Add"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Add_Click"/>
+                <!--<Button Content="{Binding ReClassifyButtonText}" Height="40" Name="ReClassify" Visibility="Collapsed" Width="88" Click="Reclassify_click" />
+            <Button Content="{Binding QuickReClassifyButtonText}" Height="40" Name="QuickReClassify" Visibility="Collapsed" Width="120" Click="QickClassify_Click"/>
+            <Button Content="{Binding BatchButtonText}" Height="40" Name="BatchBCS" Visibility="Collapsed" Width="120" Click="BatchBCS_Click"/>-->
+                <!--<Button Content="Get Picture" Height="40" Name="TakePic" Margin="12 0"  Visibility="{Binding BarcodeEntered, Converter={StaticResource BooleanToVisibilityConverter}}" Width="120" Click="TakePic_Click"/>
+                <Button Content="Save Picture" Height="40" Name="SavePic" Visibility="{Binding bGotNewImage, Converter={StaticResource BooleanToVisibilityConverter}}" Width="120" Click="SavePic_Click"/>-->
+                <!--
+            <Button Content="Version" Height="21" Name="version" Width="67" Margin="12" Click="version_Click" />-->
+            </StackPanel>
+
+        </Grid>
+        <ScrollViewer Grid.Row="1">
+            <Grid Name ="rootGrid" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+
+                </Grid.ColumnDefinitions>
+            </Grid>
+        </ScrollViewer>
+        <Grid Grid.Row="2" Background="White">
+         
+            <ProgressBar Name="Progress" Minimum="0" Maximum="100" HorizontalAlignment="Left" Height="24" Margin="427,16,0,0" VerticalAlignment="Top" Width="218"/>
+
+        </Grid>
+    </Grid>
+
 </Window>

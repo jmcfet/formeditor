@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -21,16 +20,20 @@ namespace formEditor
     public partial class FormDialog : Window
     {
         List<FormEntry> lines;
-        public FormDialog(List<FormEntry> lines)
+        public int LineNumber;
+        public Block block;
+        public FormDialog(List<FormEntry> lines,int LineNumber,Block block)
         {
             InitializeComponent();
+            this.LineNumber = LineNumber;
             this.lines = lines;
-         //   Loaded += FormDialog_Loaded;       
+            this.block = block;
+            Loaded += FormDialog_Loaded;;       
         }
 
         private void FormDialog_Loaded(object sender, RoutedEventArgs e)
         {
-            
+            /*
             rootGrid.Background = new SolidColorBrush(Colors.White); ;
             rootGrid.Margin = new Thickness(10.0);
             rootGrid.ColumnDefinitions.Add(
@@ -52,9 +55,15 @@ namespace formEditor
                 checkbox1 = "check1 text",
                 checkbox2 = "check2 text"
             };
-                 
-            SharedCode.setRoot(rootGrid);
-           HandleType1(entry);
+            */
+            Next.IsEnabled = false;
+            if (LineNumber != -1)
+            {
+                Linenum.Text = LineNumber.ToString();
+                Next.IsEnabled = true;
+            }
+      //      SharedCode.setRoot(rootGrid);
+      //     HandleType1(entry);
         }
            private RowDefinition CreateRowDefinition()
         {
@@ -62,30 +71,7 @@ namespace formEditor
             RowDefinition.Height = GridLength.Auto;
             return RowDefinition;
         }
-        public  void HandleType1(FormEntry item)
-        {
-            int row = 0;
-            Label lb;
-            rootGrid.Children.Add(CreateTextInputBlock(item.label1, row, 0));
-            
-            CheckBox cb = CreateCheckBox(row, 1, " ");
-            cb.HorizontalAlignment = HorizontalAlignment.Right;
-          //  rootGrid.Children.Add(cb);
-
-            TextBox tb  = CreateTextInputBlock(item.checkbox1, row, 1);
-         //   tb. = "Check 1";
-            tb.HorizontalAlignment = HorizontalAlignment.Left;
-            rootGrid.Children.Add(tb);
-            cb = CreateCheckBox(row, 3, item.checkbox2);
-            cb.HorizontalAlignment = HorizontalAlignment.Left;
-            rootGrid.Children.Add(cb);
-            row += 1;
-           
-            lb = CreateLabel(row, 0, item.label2);
-            rootGrid.Children.Add(lb);
-            rootGrid.Children.Add(CreateTextInputBlock(item.textbox1, row, 0));
-            row += 1;
-        }
+        
         private static Label CreateLabel(int row, int column, string text)
         {
             Label lb = new Label() { Content = text };
@@ -136,42 +122,126 @@ namespace formEditor
 
         private void Type1Done_Click(object sender, RoutedEventArgs e)
         {
-           
+            this.Close();
         }
 
         private void Next_Click(object sender, RoutedEventArgs e)
         {
-            int afterline;
+            int newLineNum = 1;
             bool insertingAfterLine = false;
-            if (Int32.TryParse(Linenum.Text, out afterline))
-            {
-                insertingAfterLine = true;
-                int newLineNum = afterline + 1;
-                for (int line = afterline - 1; line < lines.Count-1; line++)
-                {
-                    lines[line].linenum++;
-                }
-            }
-           
-            FormEntry form = new FormEntry()
-            {
-                type=1,
-                linenum = afterline,
-                label1 = Label1.Text,
-                label2 = Label2.Text,
-                checkbox1 = Check1.Text,
-                checkbox2 = Check2.Text
-            };
+            bool bchecked = false;
+            var selected = Types.SelectedItem as TabItem;
             using (var db = new EditorDb())
             {
-                db.forms.Add(form);
-                db.SaveChanges();
+              
+                if (top.IsChecked == true)
+                {
+                    bchecked = true;
+                    for (int line = 0; line < lines.Count; line++)
+                    {
+                        int oldLineNumber =  lines[line].linenum++;
+                        db.Entry(lines[line]).State = System.Data.Entity.EntityState.Modified;
+                    }
+                }
+                if (Bottom.IsChecked == true)
+                {
+                    bchecked = true;
+                    
+                    newLineNum = lines[lines.Count - 1].linenum  + 1;
+                    
+                }
+                if (bchecked == false)
+                {
+                   
+                    if (Int32.TryParse(Linenum.Text, out newLineNum))
+                    {
+                       //note reverse order to avoid duplicate line numbers
+                        for (int line = lines.Count; line > newLineNum; line--)
+                        {
+                            FormEntry item = block.questions.Where(i => i.linenum == line ).SingleOrDefault();
+                      
+                            item.linenum = item.linenum + 1;
+                            db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+
+                        }
+                    }
+                    newLineNum++;
+                }
+                FormEntry form = new FormEntry();
+                if ((String)selected.Header == "Type 1")
+                {
+                    form = new FormEntry()
+                    {
+                        type = 1,
+                        linenum = newLineNum,
+                        label1 = Label1.Text,
+                        label2 = Label2.Text,
+                        checkbox1 = Check1.Text,
+                        checkbox2 = Check2.Text
+                    };
+                    Label1.Text = "";
+                    Label2.Text = "";
+                    Check1.Text = "Yes";
+                    Check2.Text = "No";
+                }
+                if ((String)selected.Header == "Type 2")
+                {
+                    form = new FormEntry()
+                    {
+                        type = 2,
+                        linenum = newLineNum,
+                        label1 = T2Label1.Text,
+                        label2 = T2Label2.Text,
+                        label3 = T2Label3.Text,
+                        label4 = T2Label4.Text
+
+                    };
+                    T2Label1.Text = "";
+                    T2Label2.Text = "";
+                    T2Label3.Text = "";
+                    T2Label4.Text = "";
+
+                }
+                if ((String)selected.Header == "Type 3")
+                {
+                    form = new FormEntry()
+                    {
+                        type = 3,
+                        linenum = newLineNum,
+                        label1 = T3Label1.Text
+                       
+
+                    };
+                    if (MakeBold.IsChecked == true)
+                        form.isBold = true;
+                }
+                lines.Add(form);
+                block.questions.Add(form);
+                db.Entry(form).State = System.Data.Entity.EntityState.Added;
+                db.Entry(block).State = System.Data.Entity.EntityState.Modified;
+                // traverse all entities in context (hopefully they are all part of graph we just attached)
+                foreach (var entry in db.ChangeTracker.Entries<FormEntry>())
+                {
+                    // we are only interested in graph we have just attached
+                    // and we know they are all marked as Added 
+                    // and we will ignore root entity because it is already resolved correctly
+                    int ii = 0;
+                }
+                    db.SaveChanges();
             }
-            lines.Add(form);
-            Label1.Text = "";
-            Label2.Text = "";
-            Check1.Text = "Yes";
-            Check2.Text = "No";
+            Linenum.Text = newLineNum.ToString();
+
+
+        }
+
+        private void top_Click(object sender, RoutedEventArgs e)
+        {
+            Next.IsEnabled = true;
+        }
+
+        private void Bottom_Click(object sender, RoutedEventArgs e)
+        {
+            Next.IsEnabled = true;
         }
     }
 

@@ -9,12 +9,12 @@ namespace formEditor.Models
 {
     public class EditorDb : DbContext
     {
-        public EditorDb() : base("name=DefaultConnection")
+        public EditorDb() : base("name=FormEditor")
         {
-            AppDomain.CurrentDomain.SetData("DataDirectory", System.IO.Directory.GetCurrentDirectory());
+      //      AppDomain.CurrentDomain.SetData("DataDirectory", System.IO.Directory.GetCurrentDirectory());
         }
-
-        public DbSet<FormEntry> forms { get; set; }
+        public DbSet<Block> Blocks { get; set; }
+      //  public DbSet<FormEntry> forms { get; set; }
        
     }
 }
