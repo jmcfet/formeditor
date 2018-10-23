@@ -154,7 +154,12 @@
                                  Grid.Column ="2"
                            Grid.Row="0" Grid.ColumnSpan="3" Margin="174,0,150.667,0.333"
                               >
-                        <TextBlock  Text="user input"  VerticalAlignment="Top"></TextBlock>
+                        <ComboBox Name="choices">
+                            <ComboBoxItem IsSelected="True">Date</ComboBoxItem>
+                            <ComboBoxItem >Weight</ComboBoxItem>
+                            <ComboBoxItem>Number</ComboBoxItem>
+                        </ComboBox>
+                        
                     </Border>
                     <TextBox Style="{StaticResource MyWaterMarkStyle}"
                         HorizontalAlignment="Left"
@@ -169,8 +174,11 @@
                     <Border BorderBrush="Black" BorderThickness="1"
                                  Grid.Column ="5"
                            Grid.Row="0" Margin="0.333,0,0,0.333">
-                        <TextBlock Text="user input"  VerticalAlignment="Top">
-                        </TextBlock>
+                        <ComboBox Name="choices1">
+                            <ComboBoxItem IsSelected="True">Date</ComboBoxItem>
+                            <ComboBoxItem >Weight</ComboBoxItem>
+                            <ComboBoxItem>Number</ComboBoxItem>
+                        </ComboBox>
                     </Border>
                     <TextBox Style="{StaticResource MyWaterMarkStyle}"
                         HorizontalAlignment="Left"
@@ -185,8 +193,11 @@
                     <Border BorderBrush="Black" BorderThickness="1"
                                  Grid.Column ="7"
                            Grid.Row="0" Margin="0.333,0,0,0.333">
-                        <TextBlock Text="user input"  VerticalAlignment="Top">
-                        </TextBlock>
+                        <ComboBox Name="choices2">
+                            <ComboBoxItem IsSelected="True">Date</ComboBoxItem>
+                            <ComboBoxItem >Weight</ComboBoxItem>
+                            <ComboBoxItem>Number</ComboBoxItem>
+                        </ComboBox>
                     </Border>
                     <TextBox Style="{StaticResource MyWaterMarkStyle}"
                         HorizontalAlignment="Left"

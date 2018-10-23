@@ -90,6 +90,14 @@
     <Compile Include="Migrations\201810161426395_addBlocksreal.Designer.cs">
       <DependentUpon>201810161426395_addBlocksreal.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201810231755256_typevar1.cs" />
+    <Compile Include="Migrations\201810231755256_typevar1.Designer.cs">
+      <DependentUpon>201810231755256_typevar1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201810231835503_typevar2.cs" />
+    <Compile Include="Migrations\201810231835503_typevar2.Designer.cs">
+      <DependentUpon>201810231835503_typevar2.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Block.cs" />
     <Compile Include="SharedCode.cs" />
@@ -149,6 +157,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201810161426395_addBlocksreal.resx">
       <DependentUpon>201810161426395_addBlocksreal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810231755256_typevar1.resx">
+      <DependentUpon>201810231755256_typevar1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810231835503_typevar2.resx">
+      <DependentUpon>201810231835503_typevar2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

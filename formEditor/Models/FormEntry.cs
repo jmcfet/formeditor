@@ -62,7 +62,9 @@ namespace formEditor.Models
    //    public String var3 { get; set; }
         public String var4 { get; set; }
         public bool isBold { get; set; }
-
+        public int var1Type { get; set; }
+        public int var2Type { get; set; }
+        public int var3Type { get; set; }
         public string Error => throw new NotImplementedException();
 
         public event PropertyChangedEventHandler PropertyChanged;

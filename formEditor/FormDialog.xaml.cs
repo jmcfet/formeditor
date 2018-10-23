@@ -196,6 +196,9 @@ namespace formEditor
                         label4 = T2Label4.Text
 
                     };
+                    form.var1Type = choices.SelectedIndex;
+                    form.var2Type = choices1.SelectedIndex;
+                    form.var3Type = choices2.SelectedIndex;
                     T2Label1.Text = "";
                     T2Label2.Text = "";
                     T2Label3.Text = "";
@@ -215,19 +218,14 @@ namespace formEditor
                     if (MakeBold.IsChecked == true)
                         form.isBold = true;
                 }
+                
+
+
                 lines.Add(form);
                 block.questions.Add(form);
                 db.Entry(form).State = System.Data.Entity.EntityState.Added;
                 db.Entry(block).State = System.Data.Entity.EntityState.Modified;
-                // traverse all entities in context (hopefully they are all part of graph we just attached)
-                foreach (var entry in db.ChangeTracker.Entries<FormEntry>())
-                {
-                    // we are only interested in graph we have just attached
-                    // and we know they are all marked as Added 
-                    // and we will ignore root entity because it is already resolved correctly
-                    int ii = 0;
-                }
-                    db.SaveChanges();
+                db.SaveChanges();
             }
             Linenum.Text = newLineNum.ToString();
 

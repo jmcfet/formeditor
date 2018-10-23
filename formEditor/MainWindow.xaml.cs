@@ -59,7 +59,7 @@ namespace formEditor
                 selectedBlock = BlockNames[0];
             }
             Start.Visibility = Visibility.Visible;
-            Refresh();
+            
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -147,8 +147,8 @@ namespace formEditor
 
             }
 
-            rootGrid.Measure(new Size(600, 600));
-            rootGrid.Arrange(new Rect(new Size(600, 600)));
+      //      rootGrid.Measure(new Size(600, 600));
+      //      rootGrid.Arrange(new Rect(new Size(600, 600)));
             //       LayoutRoot.Children.Add(rootGrid);
 
 
@@ -193,6 +193,14 @@ namespace formEditor
         {
             TextBox tb = sender as TextBox;
             CheckBox cb = tb.Tag as CheckBox;
+            FormEntry entry = lines[(int)cb.Tag];
+            bool bResult = verifyField(entry.var1Type, tb);
+            if (!bResult)
+            {
+                // tb.Focus();
+                return;
+            }
+            
             if (cb.IsChecked == true)
            
                 removeline((int)cb.Tag);
@@ -221,7 +229,7 @@ namespace formEditor
                 //  sp.Children.Add(CreateTextInputBlock("    "));
                 tb = new TextBox() { Width = 40, Height = 30 };
                 tb.Tag = itemNumber;
-                tb.LostFocus += Tb_LostFocus1;
+                tb.LostFocus += Tb_LostFocus2;
                 myBinding = setBinding();
                 myBinding.Source = item;
                 myBinding.Path = new PropertyPath("Var2");
@@ -248,6 +256,13 @@ namespace formEditor
         {
             //if textbox is the last in the stackpanel then action is done so remove
             TextBox tb = sender as TextBox;
+            FormEntry entry = lines[(int)tb.Tag];
+            bool bResult = verifyField(entry.var1Type, tb);
+            if (!bResult)
+            {
+                // tb.Focus();
+                return;
+            }
             var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(tb);
             var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
             int index = sp.Children.IndexOf(tb);
@@ -255,7 +270,24 @@ namespace formEditor
             if (index + 1  == sp.Children.Count)
                 removeline((int)tb.Tag);
         }
+        private void Tb_LostFocus2(object sender, RoutedEventArgs e)
+        {
+            //if textbox is the last in the stackpanel then action is done so remove
+            TextBox tb = sender as TextBox;
+            FormEntry entry = lines[(int)tb.Tag];
+            bool bResult = verifyField(entry.var2Type, tb);
+            if (!bResult)
+            {
+               // tb.Focus();
+                return;
+            }
+            var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(tb);
+            var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
+            int index = sp.Children.IndexOf(tb);
 
+            if (index + 1 == sp.Children.Count)
+                removeline((int)tb.Tag);
+        }
         void HandleType3(FormEntry item)
         {
 
@@ -276,6 +308,41 @@ namespace formEditor
             }
             sp.Children.Add(tb);
             row += 1;
+        }
+        bool verifyField(int type,TextBox tb)
+        {
+            DateTime dateTime2;
+            if (type == 0)
+            {
+                if (DateTime.TryParse(tb.Text, out dateTime2))
+                {
+                    Console.WriteLine(dateTime2);
+                }
+                else
+                {
+                    MessageBox.Show("invalid date");
+                    tb.Text = "";
+                    return false;
+                }
+            }
+            if (type == 1)
+            {
+                int weight;
+                bool bFailed = false;
+                if (!Int32.TryParse(tb.Text, out weight))
+                    bFailed = true;
+
+                if (weight < 10 || weight > 85)
+                    bFailed = true;
+                 if (bFailed)
+                {
+                    MessageBox.Show("invalid weight");
+
+                    tb.Text = "";
+                    return false;
+                }
+            }
+            return true;
         }
         Binding setBinding()
         {
@@ -566,10 +633,10 @@ namespace formEditor
                 return target as T;
             }
         }
-
+        //user has loaded a form in a disabled state, enable it and start timer
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-          //  Refresh();
+          
             rootGrid.IsEnabled = true;
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(10);
