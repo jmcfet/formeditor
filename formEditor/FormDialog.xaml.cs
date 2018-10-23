@@ -180,7 +180,7 @@ namespace formEditor
                         checkbox2 = Check2.Text
                     };
                     Label1.Text = "";
-                    Label2.Text = "";
+                    
                     Check1.Text = "Yes";
                     Check2.Text = "No";
                 }

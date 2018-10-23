@@ -45,7 +45,7 @@
 
         </Grid>
         <ScrollViewer Grid.Row="1">
-            <Grid Name ="rootGrid" >
+            <Grid Name ="rootGrid" IsEnabled="False">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>

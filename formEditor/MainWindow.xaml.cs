@@ -38,17 +38,28 @@ namespace formEditor
         double timeElapsed = 0;
         DispatcherTimer timer;
         List<FormEntry> removed = new List<FormEntry>();
-        List<string> blocks = new List<string>() { "Block1", "Block2", "Block3", "Block4", "Block5", "Block5" };
+        List<Block> blocks;
+        List<string> BlockNames;
+
+
         string selectedBlock;
         public MainWindow()
         {
             InitializeComponent();
            
             KeyDown += MainWindow_KeyDown;
-            BlockSelector.ItemsSource = blocks;
-            BlockSelector.SelectedIndex = 0;
-            selectedBlock =  blocks[0];
+            using (var db = new EditorDb())
+            {
+
+                blocks = db.Blocks.ToList();
+                BlockNames = new List<string>();
+                blocks.ForEach(b => BlockNames.Add(b.Name));
+                BlockSelector.ItemsSource = BlockNames;
+                BlockSelector.SelectedIndex = 0;
+                selectedBlock = BlockNames[0];
+            }
             Start.Visibility = Visibility.Visible;
+            Refresh();
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -111,11 +122,11 @@ namespace formEditor
                 int displayRow = row;
                 //if (olditem != null &&    olditem.type != 3)
                 //    displayRow++;
-                //     if (item.type != 3)
-                //    { 
-                Button but = CreateButton(string.Format("{0}", item.linenum), displayRow, 0);
-                rootGrid.Children.Add(but);
-                //   }
+                if (item.type != 3)
+                {
+                    Button but = CreateButton(string.Format("{0}", item.linenum), displayRow, 0);
+                    rootGrid.Children.Add(but);
+                }
                 //   Label lb = CreateLabel(row, 0, string.Format("{0}", item.linenum ));
 
                 switch (item.type)
@@ -152,7 +163,7 @@ namespace formEditor
             sp.Children.Add(CreateCheckBox(item.checkbox2));
 
             row += 1;
-            if (item.label2 == null)
+            if (item.label2 == null || item.label2 == string.Empty)
             {
                 
                 return;
@@ -235,8 +246,7 @@ namespace formEditor
 
         private void Tb_LostFocus1(object sender, RoutedEventArgs e)
         {
-            //if the next sibling in visual tree of checkbox parent (stackpanel) is a button then the
-            //checkbox does not have an associated input that must be filled in. in this case delete also
+            //if textbox is the last in the stackpanel then action is done so remove
             TextBox tb = sender as TextBox;
             var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(tb);
             var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
@@ -250,8 +260,21 @@ namespace formEditor
         {
 
             StackPanel sp = CreateStackPanel(row, 1);
-            Label lb = CreateLabel(item.label1, item.isBold);
-            sp.Children.Add(lb);
+            TextBlock tb = new TextBlock();
+            tb.Width = 600;
+            tb.Height = 30;
+            tb.Text = item.label1;
+            if (item.label1.Length > 80)
+            {
+                tb.Height = 60;
+                tb.TextWrapping = TextWrapping.Wrap;
+            }
+            if (item.isBold == true)
+            {
+                tb.FontWeight = FontWeights.Bold;
+                tb.FontSize = 16;
+            }
+            sp.Children.Add(tb);
             row += 1;
         }
         Binding setBinding()
@@ -447,6 +470,7 @@ namespace formEditor
             if (passwordBox1.Password == "tennis")
             {
                 Add.Visibility = Visibility.Visible;
+                rootGrid.IsEnabled = true;
                 bEntryMode = false;
                 if (timer != null)
                     timer.Stop();
@@ -545,11 +569,14 @@ namespace formEditor
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            Refresh();
+          //  Refresh();
+            rootGrid.IsEnabled = true;
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(10);
             timer.Tick += Timer_Tick;
             timer.Start();
+            BlockSelector.IsEnabled = false;
+            passwordEntered.IsEnabled = true;
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -561,6 +588,8 @@ namespace formEditor
             {
                 MessageBox.Show("work was  completed in time", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
                 timer.Stop();
+                BlockSelector.IsEnabled = true;
+                passwordEntered.IsEnabled = true;
 
             }
             Progress.Value = numDone / initialQuestions * 100;
@@ -569,14 +598,18 @@ namespace formEditor
             {
                 MessageBox.Show("work was not completed in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
                 timer.Stop();
+                BlockSelector.IsEnabled = true;
+                passwordEntered.IsEnabled = true;
             }
         }
 
         private void BlockSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            selectedBlock = blocks[BlockSelector.SelectedIndex];
+            selectedBlock = BlockNames[BlockSelector.SelectedIndex];
             Start.Visibility = Visibility.Visible;
-          //  Edit.Visibility = Visibility.Visible;
+            itemNumber = -1;
+            Refresh();
+            rootGrid.IsEnabled = false;
         }
     }
     class info
