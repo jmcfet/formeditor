@@ -40,13 +40,12 @@ namespace formEditor
         List<FormEntry> removed = new List<FormEntry>();
         List<Block> blocks;
         List<string> BlockNames;
-
-
+        
         string selectedBlock;
         public MainWindow()
         {
             InitializeComponent();
-           
+          
             KeyDown += MainWindow_KeyDown;
             using (var db = new EditorDb())
             {
@@ -156,11 +155,24 @@ namespace formEditor
         void HandleType1(FormEntry item)
         {
             StackPanel sp = CreateStackPanel(row, 1);
-
-            sp.Children.Add(CreateLabel(item.label1, item.isBold));
-            CheckBox cb = CreateCheckBox(item.checkbox1);
+            TextBlock tb1 = new TextBlock();
+            tb1.Width = 400;
+            tb1.Height = 30;
+            tb1.Text = item.label1;
+            if (item.label1.Length > 80)
+            {
+                tb1.Height = 60;
+                tb1.TextWrapping = TextWrapping.Wrap;
+            }
+            sp.Children.Add(tb1);
+            CheckBox cb1 = CreateCheckBox1(item.checkbox1);
+            if (item.checkbox1State)
+                cb1.IsChecked = true;
+            sp.Children.Add(cb1);
+            CheckBox cb = CreateCheckBox2(item.checkbox2);
+            if (item.checkbox2State)
+                cb.IsChecked = true;
             sp.Children.Add(cb);
-            sp.Children.Add(CreateCheckBox(item.checkbox2));
 
             row += 1;
             if (item.label2 == null || item.label2 == string.Empty)
@@ -172,7 +184,7 @@ namespace formEditor
             StackPanel sp2 = CreateStackPanel(row, 1);
             sp2.Children.Add(CreateLabel(item.label2, item.isBold));
             TextBox tb = new TextBox() { Width = 60, Height = 30 };
-            tb.Tag = cb;
+            tb.Tag = cb1;
             tb.GotKeyboardFocus += Tb_GotKeyboardFocus;
             tb.LostFocus += Tb_LostFocus;
             Binding myBinding = setBinding();
@@ -193,14 +205,7 @@ namespace formEditor
         {
             TextBox tb = sender as TextBox;
             CheckBox cb = tb.Tag as CheckBox;
-            FormEntry entry = lines[(int)cb.Tag];
-            bool bResult = verifyField(entry.var1Type, tb);
-            if (!bResult)
-            {
-                // tb.Focus();
-                return;
-            }
-            
+                        
             if (cb.IsChecked == true)
            
                 removeline((int)cb.Tag);
@@ -257,12 +262,7 @@ namespace formEditor
             //if textbox is the last in the stackpanel then action is done so remove
             TextBox tb = sender as TextBox;
             FormEntry entry = lines[(int)tb.Tag];
-            bool bResult = verifyField(entry.var1Type, tb);
-            if (!bResult)
-            {
-                // tb.Focus();
-                return;
-            }
+            
             var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(tb);
             var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
             int index = sp.Children.IndexOf(tb);
@@ -275,12 +275,7 @@ namespace formEditor
             //if textbox is the last in the stackpanel then action is done so remove
             TextBox tb = sender as TextBox;
             FormEntry entry = lines[(int)tb.Tag];
-            bool bResult = verifyField(entry.var2Type, tb);
-            if (!bResult)
-            {
-               // tb.Focus();
-                return;
-            }
+            
             var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(tb);
             var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
             int index = sp.Children.IndexOf(tb);
@@ -309,51 +304,17 @@ namespace formEditor
             sp.Children.Add(tb);
             row += 1;
         }
-        bool verifyField(int type,TextBox tb)
-        {
-            DateTime dateTime2;
-            if (type == 0)
-            {
-                if (DateTime.TryParse(tb.Text, out dateTime2))
-                {
-                    Console.WriteLine(dateTime2);
-                }
-                else
-                {
-                    MessageBox.Show("invalid date");
-                    tb.Text = "";
-                    return false;
-                }
-            }
-            if (type == 1)
-            {
-                int weight;
-                bool bFailed = false;
-                if (!Int32.TryParse(tb.Text, out weight))
-                    bFailed = true;
-
-                if (weight < 10 || weight > 85)
-                    bFailed = true;
-                 if (bFailed)
-                {
-                    MessageBox.Show("invalid weight");
-
-                    tb.Text = "";
-                    return false;
-                }
-            }
-            return true;
-        }
+        
         Binding setBinding()
         {
             Binding myBinding = new Binding();
             myBinding.ValidatesOnExceptions = true;
             myBinding.ValidatesOnDataErrors = true;
             myBinding.NotifyOnValidationError = true;
-
-            myBinding.Path = new PropertyPath("Var1");
+          
             myBinding.Mode = BindingMode.TwoWay;
             myBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            
             return myBinding;
         }
         private TextBox CreateTextInputBlock(string text)
@@ -416,11 +377,11 @@ namespace formEditor
             rootGrid.Children.Add(sp);
             return sp;
         }
-        private CheckBox CreateCheckBox(string text)
+        private CheckBox CreateCheckBox1(string text)
         {
             CheckBox cb = new CheckBox();
             cb.Tag = itemNumber;
-            cb.Click += Cb_Click;
+            cb.Click += Cb_Click1;
             cb.Margin = new Thickness(5);
             cb.Height = 22;
             cb.MinWidth = 50;
@@ -430,20 +391,38 @@ namespace formEditor
 
             return cb;
         }
+        private CheckBox CreateCheckBox2(string text)
+        {
+            CheckBox cb = new CheckBox();
+            cb.Tag = itemNumber;
+            cb.Click += Cb_Click2;
+            cb.Margin = new Thickness(5);
+            cb.Height = 22;
+            cb.MinWidth = 50;
 
-        private void Cb_Click(object sender, RoutedEventArgs e)
+
+            cb.Content = text;
+
+            return cb;
+        }
+        //check 1 can only be YES or Done
+        private void Cb_Click1(object sender, RoutedEventArgs e)
         {
             CheckBox cb = sender as CheckBox;
             bool bDelete = false;
             int line = (int)cb.Tag;
-            //    line -= numdeleted; 
-            if (cb.Content as String == "No" || cb.Content as String == "Done" )  
+            FormEntry entry = lines[line];
+            if ( cb.Content as String == "Done")
+            { 
                 bDelete = true;
+                
+                entry.checkbox1State = true;
+             }
             else if (cb.Content as String == "Yes")    //no second input field
             {
                 //if the next sibling in visual tree of checkbox parent (stackpanel) is a button then the
                 //checkbox does not have an associated input that must be filled in. in this case delete also
-                
+                entry.checkbox1State = true;
                 var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(cb);
                 var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
                 int index = grid.Children.IndexOf(sp);
@@ -462,6 +441,42 @@ namespace formEditor
                   
                 removeline(line);
             
+        }
+        private void Cb_Click2(object sender, RoutedEventArgs e)
+        {
+            CheckBox cb = sender as CheckBox;
+            bool bDelete = false;
+            int line = (int)cb.Tag;
+            FormEntry entry = lines[line];
+            if (cb.Content as String == "No")
+            {
+                bDelete = true;
+
+                entry.checkbox2State = true;
+            }
+            else if (cb.Content as String == "Yes")    //no second input field
+            {
+                //if the next sibling in visual tree of checkbox parent (stackpanel) is a button then the
+                //checkbox does not have an associated input that must be filled in. in this case delete also
+                entry.checkbox1State = true;
+                var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(cb);
+                var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
+                int index = grid.Children.IndexOf(sp);
+                //check if this is last entry
+                if (index == grid.Children.Count - 1)
+                    bDelete = true;
+                else
+                {
+                    Button but = grid.Children[index + 1] as Button;
+                    if (but != null)
+                        bDelete = true;
+                }
+            }
+
+            if (bDelete)
+
+                removeline(line);
+
         }
 
         void CreateLine2(FormEntry item)
@@ -684,4 +699,5 @@ namespace formEditor
         int linenum { get; set; }
         ComboBox cb { get; set; }
     }
+    
 }

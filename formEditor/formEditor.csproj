@@ -98,6 +98,10 @@
     <Compile Include="Migrations\201810231835503_typevar2.Designer.cs">
       <DependentUpon>201810231835503_typevar2.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201810242017179_addcheckbox.cs" />
+    <Compile Include="Migrations\201810242017179_addcheckbox.Designer.cs">
+      <DependentUpon>201810242017179_addcheckbox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Block.cs" />
     <Compile Include="SharedCode.cs" />
@@ -163,6 +167,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201810231835503_typevar2.resx">
       <DependentUpon>201810231835503_typevar2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810242017179_addcheckbox.resx">
+      <DependentUpon>201810242017179_addcheckbox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace formEditor.Models
 {
@@ -23,6 +25,8 @@ namespace formEditor.Models
         public string label2 { get; set; }
         public string label3 { get; set; }
         public string label4 { get; set; }
+        public bool checkbox1State { get; set; }
+        public bool checkbox2State { get; set; }
         public string checkbox1 { get; set; }
         public string checkbox2 { get; set; }
         public string textbox1 { get; set; }
@@ -87,13 +91,15 @@ namespace formEditor.Models
                 {
                     if (String.IsNullOrEmpty(this.var1))
                         errorMsg = "mandatory field";
-
+                    else if (!verifyField(this.var1Type,this.var1))
+                        errorMsg = "mandatory field";
                 }
                 else if (columnName.Equals("Var2"))
                 {
                     if (String.IsNullOrEmpty(this.var2))
                         errorMsg = "mandatory field";
-
+                    else if (!verifyField(this.var2Type, this.var2))
+                        errorMsg = "mandatory field";
                 }
                 else if (columnName.Equals("Var3"))
                 {
@@ -113,6 +119,38 @@ namespace formEditor.Models
 
                 return errorMsg;
             }
+        }
+        bool verifyField(int type, string tb)
+        {
+            DateTime dateTime2;
+            if (type == 0)
+            {
+                if (DateTime.TryParse(tb, out dateTime2))
+                {
+                    Console.WriteLine(dateTime2);
+                }
+                else
+                {
+                    MessageBox.Show("invalid date");
+                    return false;
+                }
+            }
+            if (type == 1)
+            {
+                int weight;
+                bool bFailed = false;
+                if (!Int32.TryParse(tb, out weight))
+                    bFailed = true;
+
+                //if (weight < 10 || weight > 85)
+                //    bFailed = true;
+                if (bFailed)
+                {
+                    MessageBox.Show("invalid weight");
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
