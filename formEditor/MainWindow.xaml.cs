@@ -552,6 +552,7 @@ namespace formEditor
             if (passwordBox1.Password == "tennis")
             {
                 Add.Visibility = Visibility.Visible;
+                Configure.Visibility = Visibility.Visible;
                 rootGrid.IsEnabled = true;
                 bEntryMode = false;
                 if (timer != null)
@@ -692,6 +693,12 @@ namespace formEditor
             itemNumber = -1;
             Refresh();
             rootGrid.IsEnabled = false;
+        }
+
+        private void Configure_Click(object sender, RoutedEventArgs e)
+        {
+            Admin dlg = new Admin(BlockNames);
+            dlg.ShowDialog();
         }
     }
     class info

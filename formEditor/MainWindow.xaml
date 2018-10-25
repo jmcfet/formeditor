@@ -34,6 +34,7 @@
                     <Button Content="Start"  Name="Start"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Start_Click"/>
                 
                 <Button Content="Add"  Name="Add"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Add_Click"/>
+                <Button Content="Config"  Name="Configure"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Configure_Click"/>
                 <!--<Button Content="{Binding ReClassifyButtonText}" Height="40" Name="ReClassify" Visibility="Collapsed" Width="88" Click="Reclassify_click" />
             <Button Content="{Binding QuickReClassifyButtonText}" Height="40" Name="QuickReClassify" Visibility="Collapsed" Width="120" Click="QickClassify_Click"/>
             <Button Content="{Binding BatchButtonText}" Height="40" Name="BatchBCS" Visibility="Collapsed" Width="120" Click="BatchBCS_Click"/>-->
