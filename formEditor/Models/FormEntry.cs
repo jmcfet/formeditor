@@ -91,7 +91,7 @@ namespace formEditor.Models
                 {
                     if (String.IsNullOrEmpty(this.var1))
                         errorMsg = "mandatory field";
-                    else if (!verifyField(this.var1Type,this.var1))
+                    else if (!verifyField(this.var1Type, this.var1))
                         errorMsg = "mandatory field";
                 }
                 else if (columnName.Equals("Var2"))

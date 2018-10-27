@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,7 +41,8 @@ namespace formEditor
         List<FormEntry> removed = new List<FormEntry>();
         List<Block> blocks;
         List<string> BlockNames;
-        
+        int currentBlockIndex = -1;
+
         string selectedBlock;
         public MainWindow()
         {
@@ -123,7 +125,7 @@ namespace formEditor
                 //    displayRow++;
                 if (item.type != 3)
                 {
-                    Button but = CreateButton(string.Format("{0}", item.linenum), displayRow, 0);
+                    Button but = CreateButton( item, displayRow, 0);
                     rootGrid.Children.Add(but);
                 }
                 //   Label lb = CreateLabel(row, 0, string.Format("{0}", item.linenum ));
@@ -146,15 +148,18 @@ namespace formEditor
 
             }
 
-      //      rootGrid.Measure(new Size(600, 600));
-      //      rootGrid.Arrange(new Rect(new Size(600, 600)));
-            //       LayoutRoot.Children.Add(rootGrid);
+            
+             //      rootGrid.Measure(new Size(600, 600));
+             //      rootGrid.Arrange(new Rect(new Size(600, 600)));
+             //       LayoutRoot.Children.Add(rootGrid);
 
 
         }
+       
         void HandleType1(FormEntry item)
         {
             StackPanel sp = CreateStackPanel(row, 1);
+            sp.Tag = item;
             TextBlock tb1 = new TextBlock();
             tb1.Width = 400;
             tb1.Height = 30;
@@ -165,11 +170,11 @@ namespace formEditor
                 tb1.TextWrapping = TextWrapping.Wrap;
             }
             sp.Children.Add(tb1);
-            CheckBox cb1 = CreateCheckBox1(item.checkbox1);
+            CheckBox cb1 = CreateCheckBox1(item);
             if (item.checkbox1State)
                 cb1.IsChecked = true;
             sp.Children.Add(cb1);
-            CheckBox cb = CreateCheckBox2(item.checkbox2);
+            CheckBox cb = CreateCheckBox2(item);
             if (item.checkbox2State)
                 cb.IsChecked = true;
             sp.Children.Add(cb);
@@ -182,6 +187,7 @@ namespace formEditor
             }
                 
             StackPanel sp2 = CreateStackPanel(row, 1);
+            sp2.Tag = item;
             sp2.Children.Add(CreateLabel(item.label2, item.isBold));
             TextBox tb = new TextBox() { Width = 60, Height = 30 };
             tb.Tag = cb1;
@@ -205,21 +211,22 @@ namespace formEditor
         {
             TextBox tb = sender as TextBox;
             CheckBox cb = tb.Tag as CheckBox;
-                        
+
             if (cb.IsChecked == true)
-           
-                removeline((int)cb.Tag);
-           
+
+                removeline(cb.Tag as FormEntry);
+              
 
 
         }
 
         void HandleType2(FormEntry item)
         {
-            StackPanel sp = CreateStackPanel(row, 1);
+            StackPanel sp  = CreateStackPanel(row, 1);
+            sp.Tag = item;
             sp.Children.Add(CreateLabel(item.label1, item.isBold));
             TextBox tb = new TextBox() { Width = 60, Height = 30 };
-            tb.Tag = itemNumber;
+            tb.Tag = item;
             tb.GotKeyboardFocus += Tb_GotKeyboardFocus;
             tb.LostFocus += Tb_LostFocus1;
             Binding myBinding = setBinding();
@@ -233,7 +240,7 @@ namespace formEditor
                 sp.Children.Add(CreateLabel(item.label2, item.isBold));
                 //  sp.Children.Add(CreateTextInputBlock("    "));
                 tb = new TextBox() { Width = 40, Height = 30 };
-                tb.Tag = itemNumber;
+                tb.Tag = item;
                 tb.LostFocus += Tb_LostFocus2;
                 myBinding = setBinding();
                 myBinding.Source = item;
@@ -241,7 +248,7 @@ namespace formEditor
                 BindingOperations.SetBinding(tb, TextBox.TextProperty, myBinding);
                 sp.Children.Add(tb);
             }
-            if (item.label3 != null)
+            if (item.label3 != null && item.label3.Count() > 0 )
             {
                 tb = new TextBox() { Width = 30 };
                 myBinding = setBinding();
@@ -261,27 +268,60 @@ namespace formEditor
         {
             //if textbox is the last in the stackpanel then action is done so remove
             TextBox tb = sender as TextBox;
-            FormEntry entry = lines[(int)tb.Tag];
-            
-            var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(tb);
-            var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
-            int index = sp.Children.IndexOf(tb);
-           
-            if (index + 1  == sp.Children.Count)
-                removeline((int)tb.Tag);
-        }
-        private void Tb_LostFocus2(object sender, RoutedEventArgs e)
-        {
-            //if textbox is the last in the stackpanel then action is done so remove
-            TextBox tb = sender as TextBox;
-            FormEntry entry = lines[(int)tb.Tag];
-            
+            FormEntry entry = tb.Tag as FormEntry;
+            if (entry.type == 1)
+            {
+                int weight;
+                bool bFailed = false;
+                if (!Int32.TryParse(tb.Text, out weight))
+                    bFailed = true;
+
+                if (weight < 10 || weight > 85)
+                    bFailed = true;
+                if (bFailed)
+                {
+                    MessageBox.Show("invalid weight");
+                    return;
+                }
+            }
+
+            Debug.WriteLine(string.Format("Tb_LostFocus1 {0} {1} ", tb.Tag, tb.Text));
             var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(tb);
             var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
             int index = sp.Children.IndexOf(tb);
 
             if (index + 1 == sp.Children.Count)
-                removeline((int)tb.Tag);
+                removeline(entry);
+               
+        }
+        private void Tb_LostFocus2(object sender, RoutedEventArgs e)
+        {
+            //if textbox is the last in the stackpanel then action is done so remove
+            TextBox tb = sender as TextBox;
+            FormEntry entry = tb.Tag as FormEntry;
+            //if (entry.var2Type == 1)
+            //{
+            //    int weight;
+            //    bool bFailed = false;
+            //    if (!Int32.TryParse(tb.Text, out weight))
+            //        bFailed = true;
+
+            //    if (weight < 10 || weight > 85)
+            //        bFailed = true;
+            //    if (bFailed)
+            //    {
+            //        MessageBox.Show("invalid weight");
+            //        return ;
+            //    }
+            //}
+            Debug.WriteLine(string.Format("Tb_LostFocus2 {0} {1} ", tb.Tag, tb.Text));
+            var sp = VisualTreeHelperExtensions.FindAncestor<StackPanel>(tb);
+            var grid = VisualTreeHelperExtensions.FindAncestor<Grid>(sp);
+            int index = sp.Children.IndexOf(tb);
+
+            if (index + 1 == sp.Children.Count)
+                removeline(entry);
+              //  rootGrid.Children.Remove(sptest);
         }
         void HandleType3(FormEntry item)
         {
@@ -377,31 +417,31 @@ namespace formEditor
             rootGrid.Children.Add(sp);
             return sp;
         }
-        private CheckBox CreateCheckBox1(string text)
+        private CheckBox CreateCheckBox1(FormEntry item)
         {
             CheckBox cb = new CheckBox();
-            cb.Tag = itemNumber;
+            cb.Tag = item;
             cb.Click += Cb_Click1;
             cb.Margin = new Thickness(5);
             cb.Height = 22;
             cb.MinWidth = 50;
 
 
-            cb.Content = text;
+            cb.Content = item.checkbox1;
 
             return cb;
         }
-        private CheckBox CreateCheckBox2(string text)
+        private CheckBox CreateCheckBox2(FormEntry item)
         {
             CheckBox cb = new CheckBox();
-            cb.Tag = itemNumber;
+            cb.Tag = item;
             cb.Click += Cb_Click2;
             cb.Margin = new Thickness(5);
             cb.Height = 22;
             cb.MinWidth = 50;
 
 
-            cb.Content = text;
+            cb.Content = item.checkbox2;
 
             return cb;
         }
@@ -410,8 +450,8 @@ namespace formEditor
         {
             CheckBox cb = sender as CheckBox;
             bool bDelete = false;
-            int line = (int)cb.Tag;
-            FormEntry entry = lines[line];
+           
+            FormEntry entry = cb.Tag as FormEntry;
             if ( cb.Content as String == "Done")
             { 
                 bDelete = true;
@@ -438,16 +478,17 @@ namespace formEditor
             }
                 
             if (bDelete)
-                  
-                removeline(line);
-            
+
+                removeline(entry);
+                
+
         }
         private void Cb_Click2(object sender, RoutedEventArgs e)
         {
             CheckBox cb = sender as CheckBox;
             bool bDelete = false;
-            int line = (int)cb.Tag;
-            FormEntry entry = lines[line];
+            
+            FormEntry entry = cb.Tag as FormEntry;
             if (cb.Content as String == "No")
             {
                 bDelete = true;
@@ -475,7 +516,7 @@ namespace formEditor
 
             if (bDelete)
 
-                removeline(line);
+                removeline(entry);
 
         }
 
@@ -493,13 +534,13 @@ namespace formEditor
             //     rootGrid.Children.Add(tb);
             row += 1;
         }
-        private Button CreateButton(string text, int row, int column)
+        private Button CreateButton(FormEntry item, int row, int column)
         {
-            Button tb = new Button() { Content = text, VerticalAlignment = VerticalAlignment.Top, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(5, 8, 0, 5) };
+            Button tb = new Button() { Content = item.linenum, VerticalAlignment = VerticalAlignment.Top, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(5, 8, 0, 5) };
             tb.Height = 25;
             tb.Width = 35;
             tb.Click += Tb_Click;
-            tb.Tag = row;
+            tb.Tag = item;
             //  tb.Visibility = Visibility.Hidden;
             Grid.SetColumn(tb, column);
             Grid.SetRow(tb, row);
@@ -520,15 +561,45 @@ namespace formEditor
             }
             oldSelectedRow = lb;
         }
-        void removeline(int line)
+        void removeline(FormEntry item)
         {
-           
-            lines.RemoveAt(line);
+            List<Button> buts = new List<Button>();
+            List<StackPanel> stacks = new List<StackPanel>();
+            int childrenCount = VisualTreeHelper.GetChildrenCount(rootGrid);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(rootGrid, i);
+                // If the child is not of the request child type child  
+                Button but = child as Button;
+                if (but != null && but.Tag != null)
+                {
+                    FormEntry entry = but.Tag as FormEntry;
+                    if (entry == item)
+                        buts.Add(but);
+                      
+                }
+            }
+         
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(rootGrid, i);
+                // If the child is not of the request child type child  
+                StackPanel st = child as StackPanel;
+                if (st != null && st.Tag != null)
+                {
+                    FormEntry entry = st.Tag as FormEntry;
+                    if (entry == item)
+                        stacks.Add(st);
+
+                }
+            }
+            buts.ForEach(b => rootGrid.Children.Remove(b));
+            stacks.ForEach(s => rootGrid.Children.Remove(s));
+            lines.Remove(item);
+
             row = 0;
-            //    numdeleted++;
             itemNumber = -1;
-            rootGrid.Children.Clear();
-            CreateControlsUsingObjects();
+         
         }
         UIElement GetGridElement(Grid g, int r, int c)
         {
@@ -660,6 +731,19 @@ namespace formEditor
             timer.Start();
             BlockSelector.IsEnabled = false;
             passwordEntered.IsEnabled = true;
+            //CheckBox cb = FindChild<CheckBox>(rootGrid, null);
+            //if (cb != null)
+            //{
+            //    // cb.Focus();
+            //    DependencyObject focusScope = FocusManager.GetFocusScope(cb);
+            //    FocusManager.SetFocusedElement(focusScope, cb);
+            //    return;
+            //}
+            //TextBox tb = FindChild<TextBox>(rootGrid, null);
+            //if (tb != null)
+            
+            //    tb.Focus();
+            
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -669,8 +753,19 @@ namespace formEditor
             double numDone = initialQuestions - (double)(lines.Count - lines.Where(l => l.type == 3).Count());
             if (numDone == initialQuestions)
             {
-                MessageBox.Show("work was  completed in time", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
+                
                 timer.Stop();
+                currentBlockIndex += 1;
+                if (currentBlockIndex == BlockNames.Count())
+                {
+                    MessageBox.Show("all work done work ", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                selectedBlock = BlockNames[currentBlockIndex];
+                Start.Visibility = Visibility.Visible;
+                itemNumber = -1;
+                Refresh();
+                rootGrid.IsEnabled = false;
                 BlockSelector.IsEnabled = true;
                 passwordEntered.IsEnabled = true;
 
@@ -688,7 +783,8 @@ namespace formEditor
 
         private void BlockSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            selectedBlock = BlockNames[BlockSelector.SelectedIndex];
+            currentBlockIndex = BlockSelector.SelectedIndex;
+            selectedBlock = BlockNames[currentBlockIndex];
             Start.Visibility = Visibility.Visible;
             itemNumber = -1;
             Refresh();
@@ -699,6 +795,49 @@ namespace formEditor
         {
             Admin dlg = new Admin(BlockNames);
             dlg.ShowDialog();
+        }
+        public  T FindChild<T>(DependencyObject parent, string childName)
+          where T : DependencyObject
+        {
+            // Confirm parent and childName are valid.   
+            if (parent == null) return null;
+
+            T foundChild = null;
+
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                // If the child is not of the request child type child  
+                T childType = child as T;
+                if (childType == null)
+                {
+                    // recursively drill down the tree  
+                    foundChild = FindChild<T>(child, childName);
+
+                    // If the child is found, break so we do not overwrite the found child.   
+                    if (foundChild != null) break;
+                }
+                else if (!string.IsNullOrEmpty(childName))
+                {
+                    var frameworkElement = child as FrameworkElement;
+                    // If the child's name is set for search  
+                    if (frameworkElement != null && frameworkElement.Name == childName)
+                    {
+                        // if the child's name is of the request name  
+                        foundChild = (T)child;
+                        break;
+                    }
+                }
+                else
+                {
+                    // child element found.  
+                    foundChild = (T)child;
+                    break;
+                }
+            }
+
+            return foundChild;
         }
     }
     class info
