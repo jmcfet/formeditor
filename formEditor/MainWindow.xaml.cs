@@ -47,7 +47,7 @@ namespace formEditor
         public MainWindow()
         {
             InitializeComponent();
-          
+            Type y = typeof(Button);
             KeyDown += MainWindow_KeyDown;
             using (var db = new EditorDb())
             {
@@ -520,20 +520,7 @@ namespace formEditor
 
         }
 
-        void CreateLine2(FormEntry item)
-        {
-            //      Label lb = CreateLabel(row, 1, item.label1);
-            //    rootGrid.Children.Add(lb);
-            //     TextBox tb = CreateTextInputBlock("     ", row, 2);
-            //   tb.HorizontalAlignment = HorizontalAlignment.Left;
-            //    rootGrid.Children.Add(tb);
-            //    lb = CreateLabel(row, 3, item.label2);
-            //    rootGrid.Children.Add(lb);
-            //     tb = CreateTextInputBlock("  ", row, 4);
-            //     tb.HorizontalAlignment = HorizontalAlignment.Right;
-            //     rootGrid.Children.Add(tb);
-            row += 1;
-        }
+       
         private Button CreateButton(FormEntry item, int row, int column)
         {
             Button tb = new Button() { Content = item.linenum, VerticalAlignment = VerticalAlignment.Top, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(5, 8, 0, 5) };
@@ -561,38 +548,13 @@ namespace formEditor
             }
             oldSelectedRow = lb;
         }
+        List<Button> buts = new List<Button>();
+        List<StackPanel> stacks = new List<StackPanel>();
         void removeline(FormEntry item)
         {
-            List<Button> buts = new List<Button>();
-            List<StackPanel> stacks = new List<StackPanel>();
-            int childrenCount = VisualTreeHelper.GetChildrenCount(rootGrid);
-            for (int i = 0; i < childrenCount; i++)
-            {
-                var child = VisualTreeHelper.GetChild(rootGrid, i);
-                // If the child is not of the request child type child  
-                Button but = child as Button;
-                if (but != null && but.Tag != null)
-                {
-                    FormEntry entry = but.Tag as FormEntry;
-                    if (entry == item)
-                        buts.Add(but);
-                      
-                }
-            }
-         
-            for (int i = 0; i < childrenCount; i++)
-            {
-                var child = VisualTreeHelper.GetChild(rootGrid, i);
-                // If the child is not of the request child type child  
-                StackPanel st = child as StackPanel;
-                if (st != null && st.Tag != null)
-                {
-                    FormEntry entry = st.Tag as FormEntry;
-                    if (entry == item)
-                        stacks.Add(st);
-
-                }
-            }
+           
+            FindType(item, typeof(Button));
+            FindType(item, typeof(StackPanel));
             buts.ForEach(b => rootGrid.Children.Remove(b));
             stacks.ForEach(s => rootGrid.Children.Remove(s));
             lines.Remove(item);
@@ -600,6 +562,41 @@ namespace formEditor
             row = 0;
             itemNumber = -1;
          
+        }
+       void FindType(FormEntry item,Type type)
+       {
+            int childrenCount = VisualTreeHelper.GetChildrenCount(rootGrid);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(rootGrid, i);
+                // If the child is not of the request child type child  
+                if (type.Name == "Button")
+                {
+                    if (child as Button != null)
+                    {
+                        Button but = child as Button;
+                        if (but.Tag != null)
+                        {
+                            FormEntry entry = but.Tag as FormEntry;
+                            if (entry == item)
+                                buts.Add(but);
+                        }
+                        continue;
+                    }
+                }
+
+                    if (child as StackPanel != null)
+                    {
+                        StackPanel st = child as StackPanel;
+                        if (st.Tag != null)
+                        {
+                            FormEntry entry = (st.Tag) as FormEntry;
+                            if (entry == item)
+                                stacks.Add(st);
+                        }
+                    
+                    }
+            }
         }
         UIElement GetGridElement(Grid g, int r, int c)
         {
@@ -759,15 +756,18 @@ namespace formEditor
                 if (currentBlockIndex == BlockNames.Count())
                 {
                     MessageBox.Show("all work done work ", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
+                   
                 }
                 selectedBlock = BlockNames[currentBlockIndex];
+                timeElapsed = 0;
                 Start.Visibility = Visibility.Visible;
                 itemNumber = -1;
+                Progress.Value = 0;
                 Refresh();
                 rootGrid.IsEnabled = false;
                 BlockSelector.IsEnabled = true;
                 passwordEntered.IsEnabled = true;
+                return;
 
             }
             Progress.Value = numDone / initialQuestions * 100;

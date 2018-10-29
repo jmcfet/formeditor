@@ -10,9 +10,9 @@
         <ComboBox Name="Blocks" HorizontalAlignment="Left" Margin="89,61,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="Blocks_SelectionChanged"/>
         <TextBox Name="Timeout" HorizontalAlignment="Left" Height="23" Margin="265,61,0,0" TextWrapping="Wrap" Text="time in minutes" VerticalAlignment="Top" Width="44"/>
         <Button Name="Save" Content="Save" HorizontalAlignment="Left" Margin="366,61,0,0" VerticalAlignment="Top" Width="75" Click="Save_Click"/>
-        <ListBox HorizontalAlignment="Left" Height="100" Margin="405,201,0,0" VerticalAlignment="Top" Width="120"/>
-        <Button Name="Add" Content="Add" HorizontalAlignment="Left" Margin="281,226,0,0" VerticalAlignment="Top" Width="75" Click="Add_Click"/>
         <TextBox Style="{StaticResource MyWaterMarkStyle}" HorizontalAlignment="Left" Height="23" Margin="122,223,0,0" TextWrapping="Wrap" Text="Enter 10 digit number" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Select time in minutes for block completion " HorizontalAlignment="Left" Margin="192,10,0,0"  FontSize="20" VerticalAlignment="Top" Width="395"/>
+        <Label Content="Press save after entering each block time " HorizontalAlignment="Left" Margin="215,103,0,0" VerticalAlignment="Top" Width="226"/>
 
     </Grid>
 </Window>
