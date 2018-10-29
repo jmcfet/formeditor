@@ -67,6 +67,7 @@ namespace formEditor
         {
             if (bEntryMode)
                 return;
+           
             if (formRowSelected == -1)
             {
                 MessageBox.Show("please select a line first", "Form error");
@@ -193,6 +194,7 @@ namespace formEditor
             tb.Tag = cb1;
             tb.GotKeyboardFocus += Tb_GotKeyboardFocus;
             tb.LostFocus += Tb_LostFocus;
+            tb.KeyDown += Tb_KeyDown;
             Binding myBinding = setBinding();
             myBinding.Source = item;
             myBinding.Path = new PropertyPath("Var1");
@@ -228,6 +230,7 @@ namespace formEditor
             TextBox tb = new TextBox() { Width = 60, Height = 30 };
             tb.Tag = item;
             tb.GotKeyboardFocus += Tb_GotKeyboardFocus;
+            tb.KeyDown += Tb_KeyDown;
             tb.LostFocus += Tb_LostFocus1;
             Binding myBinding = setBinding();
             myBinding.Source = item;
@@ -241,6 +244,7 @@ namespace formEditor
                 //  sp.Children.Add(CreateTextInputBlock("    "));
                 tb = new TextBox() { Width = 40, Height = 30 };
                 tb.Tag = item;
+                tb.KeyDown += Tb_KeyDown;
                 tb.LostFocus += Tb_LostFocus2;
                 myBinding = setBinding();
                 myBinding.Source = item;
@@ -262,6 +266,22 @@ namespace formEditor
                 //sp.Children.Add(CreateTextInputBlock("    "));
             }
             row += 1;
+        }
+
+        private void Tb_KeyDown(object sender, KeyEventArgs e)
+        {
+           
+                TextBox textBox = sender as TextBox;
+                if (textBox != null)
+                {
+                    if (e.Key == Key.Return)
+                    {
+                        if (e.Key == Key.Enter)
+                        {
+                            textBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                        }
+                    }
+                }
         }
 
         private void Tb_LostFocus1(object sender, RoutedEventArgs e)
@@ -739,7 +759,7 @@ namespace formEditor
             //TextBox tb = FindChild<TextBox>(rootGrid, null);
             //if (tb != null)
             
-            //    tb.Focus();
+            //    tb.Focus();jjjjj
             
         }
 
