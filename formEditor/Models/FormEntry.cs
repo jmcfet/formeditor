@@ -20,6 +20,7 @@ namespace formEditor.Models
 
         public int Id { get; set; }
         public int linenum { get; set; }
+        public bool bCompleted { get; set; }
         public int type { get; set; }
         public string label1 { get; set; }
         public string label2 { get; set; }

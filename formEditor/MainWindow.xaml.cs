@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,9 +26,11 @@ namespace formEditor
     public partial class MainWindow : Window
     {
         List<FormEntry> lines;
+        Dictionary<string,info> propsnotinDB = new Dictionary<string, info>();
         // Grid rootGrid;
         int row = 0;
         int formRowSelected = -1;
+        FormEntry selectedItem = null;
         Brush oldSelectedBrush = null;
         StackPanel oldSelectedRow = null;
         List<Button> Selectors = new List<Button>();
@@ -42,23 +45,34 @@ namespace formEditor
         List<Block> blocks;
         List<string> BlockNames;
         int currentBlockIndex = -1;
-
         string selectedBlock;
         public MainWindow()
         {
             InitializeComponent();
-            Type y = typeof(Button);
+           
             KeyDown += MainWindow_KeyDown;
             using (var db = new EditorDb())
             {
 
-                blocks = db.Blocks.ToList();
-                BlockNames = new List<string>();
-                blocks.ForEach(b => BlockNames.Add(b.Name));
+                blocks = db.Blocks
+                    .Include(b => b.questions).ToList();
+            }
+            // blocks = db.Blocks.ToList();
+            blockinfo.ItemsSource = blocks;
+            blockinfo.DataContext = blocks;
+            BlockNames = new List<string>();
+                foreach(Block blok in blocks)
+                {
+                    blok.TimeLefttoComplete = blok.timer * 60;
+                    info info = new info() { lastLineNumber = 0, TimeLeft = 0 , bActive = false};
+                    propsnotinDB.Add(blok.Name,info);
+                    BlockNames.Add(blok.Name);
+                }
+                
                 BlockSelector.ItemsSource = BlockNames;
                 BlockSelector.SelectedIndex = 0;
                 selectedBlock = BlockNames[0];
-            }
+           
             Start.Visibility = Visibility.Visible;
             
         }
@@ -67,8 +81,8 @@ namespace formEditor
         {
             if (bEntryMode)
                 return;
-           
-            if (formRowSelected == -1)
+            Button but = sender as Button;
+            if (selectedItem == null)
             {
                 MessageBox.Show("please select a line first", "Form error");
                 return;
@@ -76,8 +90,8 @@ namespace formEditor
             using (var db = new EditorDb())
             {
                 FormEntry item = block.questions.Where(i => i.linenum == formRowSelected).SingleOrDefault();
-               block.questions.Remove(item);
-                db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
+               block.questions.Remove(selectedItem);
+                db.Entry(selectedItem).State = System.Data.Entity.EntityState.Deleted;
                 for (int line = formRowSelected + 1; line <= lines.Count; line++)
                 {
                     item = block.questions.Where(i => i.linenum == line).SingleOrDefault();
@@ -93,13 +107,13 @@ namespace formEditor
 
         void Refresh()
         {
-            using (var db = new EditorDb())
-            {
-                block = db.Blocks.Where(b => b.Name == selectedBlock)
-                     .Include(b => b.questions).SingleOrDefault();
-                lines = block.questions.OrderBy(l => l.linenum).ToList();
-            }
-
+  
+            block = blocks.Where(b => b.Name == selectedBlock)
+                
+                     .SingleOrDefault();
+       
+            info info = propsnotinDB[block.Name];
+            lines = block.questions.Where(q=>q.linenum > block.CurrentItem).OrderBy(l => l.linenum).ToList();
             row = 0;
             initialQuestions = lines.Count() - lines.Where(l => l.type == 3).Count();
             rootGrid.Children.Clear();
@@ -211,13 +225,17 @@ namespace formEditor
 
         private void Tb_LostFocus(object sender, RoutedEventArgs e)
         {
+        
+            
             TextBox tb = sender as TextBox;
             CheckBox cb = tb.Tag as CheckBox;
 
             if (cb.IsChecked == true)
-
+            {
                 removeline(cb.Tag as FormEntry);
-              
+                
+            }
+
 
 
         }
@@ -278,8 +296,29 @@ namespace formEditor
                     {
                         if (e.Key == Key.Enter)
                         {
-                            textBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                        //  textBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                        // Creating a FocusNavigationDirection object and setting it to a
+                        // local field that contains the direction selected.
+                        FocusNavigationDirection focusDirection = FocusNavigationDirection.Next;
+
+                        // MoveFocus takes a TraveralReqest as its argument.
+                        TraversalRequest request = new TraversalRequest(focusDirection);
+
+                        // Gets the element with keyboard focus.
+                        UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
+
+                        // Change keyboard focus.
+                        if (elementWithFocus != null)
+                        {
+                            
+                            elementWithFocus.MoveFocus(request);
+                            
+                                e.Handled = true;
+                               
+                            
                         }
+                        
+                    }
                     }
                 }
         }
@@ -311,8 +350,14 @@ namespace formEditor
             int index = sp.Children.IndexOf(tb);
 
             if (index + 1 == sp.Children.Count)
+            {
+
                 removeline(entry);
+                              
+                CheckForFinish();
                
+            }
+
         }
         private void Tb_LostFocus2(object sender, RoutedEventArgs e)
         {
@@ -340,7 +385,12 @@ namespace formEditor
             int index = sp.Children.IndexOf(tb);
 
             if (index + 1 == sp.Children.Count)
+            {
                 removeline(entry);
+
+                CheckForFinish();
+               
+            }
               //  rootGrid.Children.Remove(sptest);
         }
         void HandleType3(FormEntry item)
@@ -431,6 +481,7 @@ namespace formEditor
         StackPanel CreateStackPanel(int row, int column)
         {
             StackPanel sp = new StackPanel();
+            sp.Focusable = false;
             sp.Orientation = Orientation.Horizontal;
             Grid.SetColumn(sp, column);
             Grid.SetRow(sp, row);
@@ -468,6 +519,7 @@ namespace formEditor
         //check 1 can only be YES or Done
         private void Cb_Click1(object sender, RoutedEventArgs e)
         {
+           
             CheckBox cb = sender as CheckBox;
             bool bDelete = false;
            
@@ -496,15 +548,21 @@ namespace formEditor
                         bDelete = true;
                 }
             }
-                
+
             if (bDelete)
-
+            {
                 removeline(entry);
-                
+                //buts.ForEach(b => rootGrid.Children.Remove(b));
+                //stacks.ForEach(s => rootGrid.Children.Remove(s));
+                //buts.Clear();
+                //stacks.Clear();
+            }
 
-        }
+
+            }
         private void Cb_Click2(object sender, RoutedEventArgs e)
         {
+            
             CheckBox cb = sender as CheckBox;
             bool bDelete = false;
             
@@ -535,56 +593,74 @@ namespace formEditor
             }
 
             if (bDelete)
-
+            {
                 removeline(entry);
+               
+            }
 
         }
 
        
         private Button CreateButton(FormEntry item, int row, int column)
         {
-            Button tb = new Button() { Content = item.linenum, VerticalAlignment = VerticalAlignment.Top, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(5, 8, 0, 5) };
-            tb.Height = 25;
-            tb.Width = 35;
-            tb.Click += Tb_Click;
-            tb.Tag = item;
+            Button but = new Button() { Content = item.linenum, VerticalAlignment = VerticalAlignment.Top, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(5, 8, 0, 5) };
+            but.Height = 25;
+            but.Focusable = false;
+            but.Width = 35;
+            but.Click += but_Click;
+            but.Tag = item;
             //  tb.Visibility = Visibility.Hidden;
-            Grid.SetColumn(tb, column);
-            Grid.SetRow(tb, row);
-            Selectors.Add(tb);
-            return tb;
+            Grid.SetColumn(but, column);
+            Grid.SetRow(but, row);
+            Selectors.Add(but);
+            return but;
         }
 
-        private void Tb_Click(object sender, RoutedEventArgs e)
+        private void but_Click(object sender, RoutedEventArgs e)
         {
-            Button tb = sender as Button;
-            formRowSelected = int.Parse(tb.Content as String);
-            StackPanel lb = GetGridElement(rootGrid, (int)tb.Tag, 1) as StackPanel;
-            lb.Background = new SolidColorBrush(Colors.LightGray);
+            Button but = sender as Button;
+
+            selectedItem   = but.Tag as FormEntry;
+            
+            FindType(selectedItem, typeof(Button));
+            FindType(selectedItem, typeof(StackPanel));
+         //   StackPanel lb = GetGridElement(rootGrid, (int)but.Tag, 1) as StackPanel;
+            stacks[0].Background = new SolidColorBrush(Colors.LightGray);
             if (oldSelectedRow != null)
             {
                 oldSelectedRow.Background = oldSelectedBrush;
 
             }
-            oldSelectedRow = lb;
+            oldSelectedRow = stacks[0];
         }
         List<Button> buts = new List<Button>();
         List<StackPanel> stacks = new List<StackPanel>();
         void removeline(FormEntry item)
         {
-           
+            
+            
             FindType(item, typeof(Button));
             FindType(item, typeof(StackPanel));
             buts.ForEach(b => rootGrid.Children.Remove(b));
             stacks.ForEach(s => rootGrid.Children.Remove(s));
-            lines.Remove(item);
+            block.CurrentItem = item.linenum;
 
-            row = 0;
+
+            //using (var db = new EditorDb())
+            //{
+            //    db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+            //    db.SaveChanges();
+            //}
+            lines.Remove(item);
             itemNumber = -1;
          
         }
        void FindType(FormEntry item,Type type)
        {
+            if (type.Name == "Button")
+                buts.Clear();
+            else
+                stacks.Clear();
             int childrenCount = VisualTreeHelper.GetChildrenCount(rootGrid);
             for (int i = 0; i < childrenCount; i++)
             {
@@ -641,6 +717,7 @@ namespace formEditor
             {
                 Add.Visibility = Visibility.Visible;
                 Configure.Visibility = Visibility.Visible;
+                logout.Visibility = Visibility.Visible;
                 rootGrid.IsEnabled = true;
                 bEntryMode = false;
                 if (timer != null)
@@ -672,56 +749,7 @@ namespace formEditor
             dialog.ShowDialog();
         }
 
-        private void Done_Click(object sender, RoutedEventArgs e)
-        {
-            bool bHasErrors = false;
-            int count = 0;
-            foreach (FormEntry item in lines)
-            {
-               
-                if (item.type == 1)
-                {
-                    
-                    if (item.Var1 == null)
-                    {
-                        bHasErrors = true;
-                        break;
-                    }
-                }
-                if (item.type == 2)
-                {
-                    if (item.label1 != null)
-                    {
-                        if (item.Var1 == null)
-                        {
-                            bHasErrors = true;
-                            break;
-                        }
-                    }
-                    if (item.label2 != null)
-                    {
-                        if (item.Var2 == null)
-                        {
-                            bHasErrors = true;
-                            break;
-                        }
-                    }
-                    if (item.label3 != null)
-                    {
-                        if (item.Var3 == null)
-                        {
-                            bHasErrors = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (bHasErrors)
-            {
-                MessageBox.Show("Must complete all steps");
-            }
-            timer.Stop();
-        }
+       
 
         public static class VisualTreeHelperExtensions
         {
@@ -746,6 +774,7 @@ namespace formEditor
             timer.Interval = TimeSpan.FromSeconds(10);
             timer.Tick += Timer_Tick;
             timer.Start();
+            propsnotinDB[block.Name].bActive = true;
             BlockSelector.IsEnabled = false;
             passwordEntered.IsEnabled = true;
             //CheckBox cb = FindChild<CheckBox>(rootGrid, null);
@@ -767,8 +796,23 @@ namespace formEditor
         {
             // MessageBox.Show("work was not copleted in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
             //  timer.Stop();
-            double numDone = initialQuestions - (double)(lines.Count - lines.Where(l => l.type == 3).Count());
-            if (numDone == initialQuestions)
+            //  CheckForFinish();
+            foreach (Block blok in blocks)
+            {
+                if (propsnotinDB[blok.Name].bActive)
+                {
+                    blok.TimeLefttoComplete -= 10;
+                  //  if (blok.TimeLefttoComplete < 120 )
+
+                }
+              
+            }
+           
+        }
+        void CheckForFinish()
+        { 
+            double numLeft = lines.Where(l => l.type != 3).Count();
+            if (numLeft == 0)
             {
                 
                 timer.Stop();
@@ -779,10 +823,11 @@ namespace formEditor
                    
                 }
                 selectedBlock = BlockNames[currentBlockIndex];
+                BlockSelector.SelectedIndex += 1;
                 timeElapsed = 0;
                 Start.Visibility = Visibility.Visible;
                 itemNumber = -1;
-                Progress.Value = 0;
+          //      Progress.Value = 0;
                 Refresh();
                 rootGrid.IsEnabled = false;
                 BlockSelector.IsEnabled = true;
@@ -790,7 +835,9 @@ namespace formEditor
                 return;
 
             }
-            Progress.Value = numDone / initialQuestions * 100;
+            //Progress.Value = numLeft / initialQuestions * 100;
+            //if (Progress.Value > 40)
+            //    Progress.Foreground = new SolidColorBrush(Colors.Azure);
             timeElapsed += 10;
             if  (timeElapsed > block.timer * 60 )
             {
@@ -859,11 +906,71 @@ namespace formEditor
 
             return foundChild;
         }
+
+        private void logout_Click(object sender, RoutedEventArgs e)
+        {
+            Add.Visibility = Visibility.Collapsed;
+            Configure.Visibility = Visibility.Collapsed;
+            logout.Visibility = Visibility.Collapsed;
+            bEntryMode = true;
+        }
+
+        private void chooseBlock_Click(object sender, RoutedEventArgs e)
+        {
+            Button but = sender as Button;
+            string blockName = but.Content as string;
+            if (blockName == selectedBlock)
+                return;
+            selectedBlock = blockName;
+           
+          
+            Start.Visibility = Visibility.Visible;
+            itemNumber = -1;
+            Start.Content = "Start";
+            if (propsnotinDB[blockName].bActive)
+                Start.Content = "Resume";
+            Refresh();
+          
+        }
     }
     class info
     {
-        int linenum { get; set; }
-        ComboBox cb { get; set; }
+        public int lastLineNumber { get; set; }
+        public double TimeLeft  { get; set; }
+        public bool bActive { get; set; }
     }
-    
+    public class BackgroundColourConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo
+         culture)
+        {
+            double number = 0;
+            if (value == null)
+                return new SolidColorBrush(Colors.White);
+            
+            if (value is double)
+                number = (double)value;
+           
+            if (number <= 0)
+            {
+                return new SolidColorBrush(Colors.Red);
+
+            }
+            else if (number <= 140)
+            {
+                return new SolidColorBrush(Colors.Yellow);
+            }
+            return new SolidColorBrush(Colors.LightGray);
+        }
+
+       
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+
+       
+    }
+
 }

@@ -105,6 +105,18 @@
     <Compile Include="Migrations\201810242017179_addcheckbox.Designer.cs">
       <DependentUpon>201810242017179_addcheckbox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201810312018039_timeLefttoComplete.cs" />
+    <Compile Include="Migrations\201810312018039_timeLefttoComplete.Designer.cs">
+      <DependentUpon>201810312018039_timeLefttoComplete.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201811011532290_bCompleted.cs" />
+    <Compile Include="Migrations\201811011532290_bCompleted.Designer.cs">
+      <DependentUpon>201811011532290_bCompleted.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201811021315561_currentitem.cs" />
+    <Compile Include="Migrations\201811021315561_currentitem.Designer.cs">
+      <DependentUpon>201811021315561_currentitem.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Block.cs" />
     <Compile Include="SharedCode.cs" />
@@ -177,6 +189,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201810242017179_addcheckbox.resx">
       <DependentUpon>201810242017179_addcheckbox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810312018039_timeLefttoComplete.resx">
+      <DependentUpon>201810312018039_timeLefttoComplete.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201811011532290_bCompleted.resx">
+      <DependentUpon>201811011532290_bCompleted.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201811021315561_currentitem.resx">
+      <DependentUpon>201811021315561_currentitem.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
