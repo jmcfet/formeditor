@@ -8,7 +8,56 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="800">
     <Window.Resources>
+        <Style x:Key="ListBoxSelectedItemsStyle" TargetType="{x:Type ListBoxItem}">
+            <Style.Resources>
+                <LinearGradientBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                            EndPoint="1,0.5" StartPoint="0,0.25" >
+                    <GradientStop Color="#FF808FF0" Offset="0"/>
+                    <GradientStop Color="#FFFFFFFF" Offset="0.865"/>
+                    <GradientStop Color="#FFE1F0E8" Offset="0.394"/>
+                    <GradientStop Color="#FF99A9F0" Offset="0.663"/>
+                    <GradientStop Color="#FF5B6EE6" Offset="0.962"/>
+                </LinearGradientBrush>
+                <LinearGradientBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                            EndPoint="0.25,1" StartPoint="0,0.5" >
+                    <GradientStop Color="#FFD9DCEC" Offset="0"/>
+                    <GradientStop Color="#FFFFFFFF" Offset="0.865"/>
+                    <GradientStop Color="#B2C6CCF0" Offset="0.394"/>
+                    <GradientStop Color="#FFD8DDF1" Offset="0.663"/>
+                    <GradientStop Color="#FF888FF0" Offset="0.962"/>
+                </LinearGradientBrush>
+            </Style.Resources>
+        </Style>
         <local:BackgroundColourConverter x:Key="colorConverter"/>
+        <local:TimeDisplay x:Key="TimeConverter"/>
+        <local:DisplayItem x:Key="displayItem" />
+        <ItemsPanelTemplate x:Key="ImageGalleryItemsPanelTemplate">
+
+            <!--Display Images on UniformGrid Panel-->
+            <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center" Height="120" VerticalAlignment="Stretch"/>
+
+        </ItemsPanelTemplate>
+        <DataTemplate x:Key="ImageGalleryDataTemplate">
+            <Border  BorderThickness="2" BorderBrush="Navy" HorizontalAlignment="Center"  VerticalAlignment="Center" 
+                                   Height="Auto" Width="Auto" MinWidth="134" CornerRadius="5"
+                                  Margin="1" >
+                <TextBlock HorizontalAlignment="Center" Height="Auto" TextWrapping="Wrap" 
+                                    Text="{Binding Name}" 
+                                    VerticalAlignment="Center" MinWidth="90" FontSize="17" FontWeight="DemiBold" Foreground="#FF09099B" 
+                                    Margin="5,3"  TextAlignment="Center" />
+            </Border>
+            <!--<Button Width="150" Height="150" Background="{Binding TimeLefttoComplete, 
+             Converter ={StaticResource  colorConverter}}" Click="chooseBlock_Click">
+                <Button.Content>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Name="button" Text="{Binding Name}" TextAlignment="Center"  FontSize="50"/>
+                        <TextBlock Text="{Binding TimeLefttoComplete,Converter={StaticResource  TimeConverter}}" FontSize="16"></TextBlock>
+                        <TextBlock Text="{Binding CurrentItem,Converter={StaticResource  displayItem}}" FontSize="16"></TextBlock>
+                    </StackPanel>
+                </Button.Content>
+            </Button>-->
+
+        </DataTemplate>
     </Window.Resources>
     <Grid  Background="#FF0C0C0C">
         <Grid.RowDefinitions>
@@ -59,20 +108,93 @@
             </Grid>
         </ScrollViewer>
         <Grid Grid.Row="2" Background="White">
-            <DataGrid Name="blockinfo"  AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Block">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding Path='Name'}" Background="{Binding TimeLefttoComplete, 
-             Converter ={StaticResource  colorConverter}}" Click="chooseBlock_Click"></Button>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Time Left" Binding="{Binding Path='TimeLefttoComplete'}" IsReadOnly="True"></DataGridTextColumn>
-                    <DataGridTextColumn Header="current Task" Binding="{Binding Path='CurrentItem'}" IsReadOnly="True"></DataGridTextColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+            <ListBox x:Name="blockinfo" SelectedIndex="0"  SelectionChanged="BlockInfo_SelectionChanged"  SelectionMode="Single" 
+                     ItemsPanel="{DynamicResource ImageGalleryItemsPanelTemplate}">
+                <ListBox.Resources>
+                    <SolidColorBrush x:Key="ItemContainerBackground" Color="LightGreen" />
+                    <SolidColorBrush x:Key="ItemContainerForeground" Color="#000" />
+                    <SolidColorBrush x:Key="ItemContainerBoderBrush" Color="#999" />
+                    <SolidColorBrush x:Key="ItemContainerMouseOverBackground" Color="Green" />
+                    <SolidColorBrush x:Key="ItemContainerBorderMouseOverBackground" Color="#666" />
+                    <SolidColorBrush x:Key="ItemContainerMouseOverForeground" Color="Red" />
+                    <SolidColorBrush x:Key="ItemContainerSelectedBackground" Color="Green"/>
+                    <SolidColorBrush x:Key="ItemContainerSelectedForeground" Color="#A0D"/>
+                </ListBox.Resources>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                    <Border
+                                    x:Name="Bd"
+                                    MinHeight="{TemplateBinding MinHeight}"
+                                    MaxHeight="{TemplateBinding MaxHeight}"
+                                    Margin="2"
+                                    Padding="{TemplateBinding Padding}"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="5"
+                                    SnapsToDevicePixels="true">
+                                        <ContentPresenter
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="BorderBrush" Value="{StaticResource ItemContainerBoderBrush}" />
+                        <Setter Property="BorderThickness" Value="2" />
+                        <Setter Property="MinHeight" Value="30" />
+                        <Setter Property="Background" Value="{StaticResource ItemContainerBackground}" />
+                        <Setter Property="Foreground" Value="{StaticResource ItemContainerForeground}" />
+                        <Setter Property="Padding" Value="5,0,0,0" />
+                        <Setter Property="LayoutTransform">
+                            <Setter.Value>
+                                <ScaleTransform ScaleX="1" ScaleY="1" />
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ItemContainerSelectedBackground}" />
+                                <Setter Property="Foreground" Value="{StaticResource ItemContainerSelectedForeground}" />
+                                <Setter Property="FontSize" Value="20" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ItemContainerMouseOverBackground}" />
+                                <Setter Property="Foreground" Value="{StaticResource ItemContainerMouseOverForeground}" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding Path = 'Selected'}" Value="True">
+                                <Setter Property="Background" Value="Red"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border  BorderThickness="2" BorderBrush="Navy" HorizontalAlignment="Center"  VerticalAlignment="Center" 
+                                   Height="Auto" Width="Auto" MinWidth="134" CornerRadius="5"
+                                  Margin="1" >
+                            <StackPanel Orientation="Vertical">
+                    <TextBlock HorizontalAlignment="Center" Height="Auto" TextWrapping="Wrap" 
+                                    Text="{Binding Name}" 
+                                    VerticalAlignment="Center" MinWidth="90" FontSize="30" FontWeight="DemiBold" Foreground="#FF09099B" 
+                                    Margin="5,3"  TextAlignment="Center" />
+                            <TextBlock HorizontalAlignment="Center" Height="Auto" TextWrapping="Wrap" 
+                                    Text="{Binding TimeLefttoComplete,Converter={StaticResource TimeConverter}}" 
+                                    VerticalAlignment="Center" MinWidth="90" FontSize="17" FontWeight="DemiBold" Foreground="#FF09099B" 
+                                    Margin="5,3"  TextAlignment="Center" />
+                                <TextBlock HorizontalAlignment="Center" Height="Auto" TextWrapping="Wrap" 
+                                    Text="{Binding CurrentItem,Converter={StaticResource displayItem}}" 
+                                    VerticalAlignment="Center" MinWidth="90" FontSize="17" FontWeight="DemiBold" Foreground="#FF09099B" 
+                                    Margin="5,3"  TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
         </Grid>
     </Grid>

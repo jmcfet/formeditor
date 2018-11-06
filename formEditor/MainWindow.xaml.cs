@@ -60,6 +60,7 @@ namespace formEditor
             // blocks = db.Blocks.ToList();
             blockinfo.ItemsSource = blocks;
             blockinfo.DataContext = blocks;
+            
             BlockNames = new List<string>();
                 foreach(Block blok in blocks)
                 {
@@ -552,6 +553,7 @@ namespace formEditor
             if (bDelete)
             {
                 removeline(entry);
+                CheckForFinish();
                 //buts.ForEach(b => rootGrid.Children.Remove(b));
                 //stacks.ForEach(s => rootGrid.Children.Remove(s));
                 //buts.Clear();
@@ -595,7 +597,7 @@ namespace formEditor
             if (bDelete)
             {
                 removeline(entry);
-               
+               CheckForFinish();
             }
 
         }
@@ -770,10 +772,14 @@ namespace formEditor
         {
           
             rootGrid.IsEnabled = true;
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(10);
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            if (timer == null)
+            {
+                timer = new DispatcherTimer();
+                timer.Interval = TimeSpan.FromSeconds(10);
+                timer.Tick += Timer_Tick;
+                timer.Start();
+            }
+          //  if (propsnotinDB[block.Name].bCompleted)
             propsnotinDB[block.Name].bActive = true;
             BlockSelector.IsEnabled = false;
             passwordEntered.IsEnabled = true;
@@ -796,18 +802,27 @@ namespace formEditor
         {
             // MessageBox.Show("work was not copleted in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
             //  timer.Stop();
-            //  CheckForFinish();
+           
             foreach (Block blok in blocks)
             {
                 if (propsnotinDB[blok.Name].bActive)
                 {
+                    
+                    if (blok.TimeLefttoComplete == 0)
+                    {
+                        MessageBox.Show("work was not copleted in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        propsnotinDB[blok.Name].bActive = false;
+                        return;
+                    }
                     blok.TimeLefttoComplete -= 10;
-                  //  if (blok.TimeLefttoComplete < 120 )
-
+                    if (blok.TimeLefttoComplete <= 0)
+                        blok.Selected = true;
                 }
-              
+
             }
-           
+            CheckForFinish();
+
+
         }
         void CheckForFinish()
         { 
@@ -857,6 +872,18 @@ namespace formEditor
             Refresh();
             rootGrid.IsEnabled = false;
         }
+        private void BlockInfo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            currentBlockIndex = blockinfo.SelectedIndex;
+            if (BlockNames == null)
+                return;
+            selectedBlock = BlockNames[currentBlockIndex];
+            Start.Visibility = Visibility.Visible;
+            itemNumber = -1;
+            Refresh();
+            rootGrid.IsEnabled = false;
+        }
+
 
         private void Configure_Click(object sender, RoutedEventArgs e)
         {
@@ -918,18 +945,29 @@ namespace formEditor
         private void chooseBlock_Click(object sender, RoutedEventArgs e)
         {
             Button but = sender as Button;
-            string blockName = but.Content as string;
-            if (blockName == selectedBlock)
-                return;
-            selectedBlock = blockName;
+            StackPanel sp = but.Content as StackPanel;
+            string blockName = string.Empty;
+            for (int i = 0; i < sp.Children.Count; i++)
+            {
+                UIElement element = sp.Children[i];
+                TextBlock tb = sp.Children[i] as TextBlock;
+                if (tb != null && tb.Name == "button")
+                {
+                    blockName = tb.Text;
+                    break;
+                }
+            }
+                if (blockName == string.Empty ||blockName == selectedBlock)
+                    return;
+                selectedBlock = blockName;
            
           
-            Start.Visibility = Visibility.Visible;
-            itemNumber = -1;
-            Start.Content = "Start";
-            if (propsnotinDB[blockName].bActive)
-                Start.Content = "Resume";
-            Refresh();
+                Start.Visibility = Visibility.Visible;
+                itemNumber = -1;
+                Start.Content = "Start";
+                if (propsnotinDB[blockName].bActive)
+                    Start.Content = "Resume";
+                Refresh();
           
         }
     }
@@ -946,7 +984,7 @@ namespace formEditor
         {
             double number = 0;
             if (value == null)
-                return new SolidColorBrush(Colors.White);
+                return new SolidColorBrush(Colors.LightGreen);
             
             if (value is double)
                 number = (double)value;
@@ -972,5 +1010,35 @@ namespace formEditor
 
        
     }
+    public class TimeDisplay : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            
+            TimeSpan t = TimeSpan.FromSeconds((double)value);
+            string str = "Time left " + t.ToString(@"h\:mm\:ss");
+            return str;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class DisplayItem : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string str = string.Format("current item {0} " ,value);
+            return str;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+   
 
 }

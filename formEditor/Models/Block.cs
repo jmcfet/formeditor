@@ -12,6 +12,7 @@ namespace formEditor.Models
         string name;
         double timeLefttoComplete;
         int currentItem;
+        bool selected;
         public int Id { get; set; }
         public string Name
         {
@@ -43,6 +44,16 @@ namespace formEditor.Models
                 NotifyPropertyChanged("CurrentItem");
             }
         }
+        public bool Selected
+        {
+            get { return selected; }
+            set
+            {
+                selected = value;
+                NotifyPropertyChanged("Selected");
+            }
+        }
+
         public List<FormEntry> questions { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
