@@ -18,24 +18,13 @@
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center" Height="120" VerticalAlignment="Stretch"/>
 
         </ItemsPanelTemplate>
-        <DataTemplate x:Key="ImageGalleryDataTemplate">
-            <Border  BorderThickness="2" BorderBrush="Navy" HorizontalAlignment="Center"  VerticalAlignment="Center" 
-                                   Height="Auto" Width="Auto" MinWidth="134" CornerRadius="5"
-                                  Margin="1" >
-                <TextBlock HorizontalAlignment="Center" Height="Auto" TextWrapping="Wrap" 
-                                    Text="{Binding Name}" 
-                                    VerticalAlignment="Center" MinWidth="90" FontSize="17" FontWeight="DemiBold" Foreground="#FF09099B" 
-                                    Margin="5,3"  TextAlignment="Center" />
-            </Border>
-           
-
-        </DataTemplate>
+        
     </Window.Resources>
     <Grid  Background="#FF0C0C0C">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="200"></RowDefinition>
+            <RowDefinition Height="150"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" >
             <Grid.Background>

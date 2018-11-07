@@ -815,7 +815,7 @@ namespace formEditor
                 }
 
             }
-            CheckForFinish();
+        //    CheckForFinish();
 
 
         }
@@ -853,6 +853,9 @@ namespace formEditor
             if (BlockNames == null)
                 return;
             selectedBlock = BlockNames[currentBlockIndex];
+            Start.Content = "Start";
+            if (propsnotinDB[selectedBlock].bActive)
+                Start.Content = "Resume";
             Start.Visibility = Visibility.Visible;
             itemNumber = -1;
             Refresh();
