@@ -8,27 +8,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="800">
     <Window.Resources>
-        <Style x:Key="ListBoxSelectedItemsStyle" TargetType="{x:Type ListBoxItem}">
-            <Style.Resources>
-                <LinearGradientBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
-                            EndPoint="1,0.5" StartPoint="0,0.25" >
-                    <GradientStop Color="#FF808FF0" Offset="0"/>
-                    <GradientStop Color="#FFFFFFFF" Offset="0.865"/>
-                    <GradientStop Color="#FFE1F0E8" Offset="0.394"/>
-                    <GradientStop Color="#FF99A9F0" Offset="0.663"/>
-                    <GradientStop Color="#FF5B6EE6" Offset="0.962"/>
-                </LinearGradientBrush>
-                <LinearGradientBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
-                            EndPoint="0.25,1" StartPoint="0,0.5" >
-                    <GradientStop Color="#FFD9DCEC" Offset="0"/>
-                    <GradientStop Color="#FFFFFFFF" Offset="0.865"/>
-                    <GradientStop Color="#B2C6CCF0" Offset="0.394"/>
-                    <GradientStop Color="#FFD8DDF1" Offset="0.663"/>
-                    <GradientStop Color="#FF888FF0" Offset="0.962"/>
-                </LinearGradientBrush>
-            </Style.Resources>
-        </Style>
-        <local:BackgroundColourConverter x:Key="colorConverter"/>
+      
+       
         <local:TimeDisplay x:Key="TimeConverter"/>
         <local:DisplayItem x:Key="displayItem" />
         <ItemsPanelTemplate x:Key="ImageGalleryItemsPanelTemplate">
@@ -46,16 +27,7 @@
                                     VerticalAlignment="Center" MinWidth="90" FontSize="17" FontWeight="DemiBold" Foreground="#FF09099B" 
                                     Margin="5,3"  TextAlignment="Center" />
             </Border>
-            <!--<Button Width="150" Height="150" Background="{Binding TimeLefttoComplete, 
-             Converter ={StaticResource  colorConverter}}" Click="chooseBlock_Click">
-                <Button.Content>
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Name="button" Text="{Binding Name}" TextAlignment="Center"  FontSize="50"/>
-                        <TextBlock Text="{Binding TimeLefttoComplete,Converter={StaticResource  TimeConverter}}" FontSize="16"></TextBlock>
-                        <TextBlock Text="{Binding CurrentItem,Converter={StaticResource  displayItem}}" FontSize="16"></TextBlock>
-                    </StackPanel>
-                </Button.Content>
-            </Button>-->
+           
 
         </DataTemplate>
     </Window.Resources>
@@ -80,9 +52,7 @@
                 <Label Content="Password"  Name="password" Width="75"  FontSize="15" />
                 <PasswordBox  Name="passwordBox1" Width="120" />
                 <Button Content=">" Name="passwordEntered" Width="36"  Click="passwordEntered_Click" />
-                <ComboBox   Name="BlockSelector"   Width="77" Margin="10,0,0,0" Visibility="Collapsed"  SelectionChanged ="BlockSelector_SelectionChanged" >
-
-                </ComboBox>
+           
                     <Button Content="Start"  Name="Start"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Start_Click"/>
                 
                 <Button Content="Add"  Name="Add"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Add_Click"/>
@@ -166,8 +136,11 @@
                                 <Setter Property="Background" Value="{StaticResource ItemContainerMouseOverBackground}" />
                                 <Setter Property="Foreground" Value="{StaticResource ItemContainerMouseOverForeground}" />
                             </Trigger>
-                            <DataTrigger Binding="{Binding Path = 'Selected'}" Value="True">
+                            <DataTrigger Binding="{Binding Path = 'TimedOut'}" Value="True">
                                 <Setter Property="Background" Value="Red"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path = 'Warning'}" Value="True">
+                                <Setter Property="Background" Value="Yellow"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

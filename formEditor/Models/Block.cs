@@ -13,6 +13,8 @@ namespace formEditor.Models
         double timeLefttoComplete;
         int currentItem;
         bool selected;
+        bool warning;
+        bool timedOut;
         public int Id { get; set; }
         public string Name
         {
@@ -51,6 +53,24 @@ namespace formEditor.Models
             {
                 selected = value;
                 NotifyPropertyChanged("Selected");
+            }
+        }
+        public bool Warning
+        {
+            get { return warning; }
+            set
+            {
+                warning = value;
+                NotifyPropertyChanged("Warning");
+            }
+        }
+        public bool TimedOut
+        {
+            get { return timedOut; }
+            set
+            {
+                timedOut = value;
+                NotifyPropertyChanged("TimedOut");
             }
         }
 

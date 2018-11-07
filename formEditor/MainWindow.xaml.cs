@@ -69,11 +69,12 @@ namespace formEditor
                     propsnotinDB.Add(blok.Name,info);
                     BlockNames.Add(blok.Name);
                 }
-                
-                BlockSelector.ItemsSource = BlockNames;
-                BlockSelector.SelectedIndex = 0;
-                selectedBlock = BlockNames[0];
-           
+            selectedBlock = BlockNames[0];
+            Start.Visibility = Visibility.Visible;
+            itemNumber = -1;
+            Refresh();
+            rootGrid.IsEnabled = false;
+                   
             Start.Visibility = Visibility.Visible;
             
         }
@@ -775,26 +776,13 @@ namespace formEditor
             if (timer == null)
             {
                 timer = new DispatcherTimer();
-                timer.Interval = TimeSpan.FromSeconds(10);
+                timer.Interval = TimeSpan.FromSeconds(1);
                 timer.Tick += Timer_Tick;
                 timer.Start();
             }
           //  if (propsnotinDB[block.Name].bCompleted)
             propsnotinDB[block.Name].bActive = true;
-            BlockSelector.IsEnabled = false;
             passwordEntered.IsEnabled = true;
-            //CheckBox cb = FindChild<CheckBox>(rootGrid, null);
-            //if (cb != null)
-            //{
-            //    // cb.Focus();
-            //    DependencyObject focusScope = FocusManager.GetFocusScope(cb);
-            //    FocusManager.SetFocusedElement(focusScope, cb);
-            //    return;
-            //}
-            //TextBox tb = FindChild<TextBox>(rootGrid, null);
-            //if (tb != null)
-            
-            //    tb.Focus();jjjjj
             
         }
 
@@ -808,15 +796,22 @@ namespace formEditor
                 if (propsnotinDB[blok.Name].bActive)
                 {
                     
-                    if (blok.TimeLefttoComplete == 0)
+                    if (blok.TimeLefttoComplete == 0 && !propsnotinDB[blok.Name].bMessageShown)
                     {
-                        MessageBox.Show("work was not copleted in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
-                        propsnotinDB[blok.Name].bActive = false;
+                        blok.Warning = false;
+                        blok.TimedOut = true;
+                        MessageBox.Show("work was not completed in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        // propsnotinDB[blok.Name].bActive = false;
+                        propsnotinDB[blok.Name].bMessageShown = true;
+                        
                         return;
                     }
-                    blok.TimeLefttoComplete -= 10;
-                    if (blok.TimeLefttoComplete <= 0)
-                        blok.Selected = true;
+                    if (blok.TimeLefttoComplete == 0)   //message was shown but still allow the user to finish block
+                        return;
+                    blok.TimeLefttoComplete -= 1;
+                    if (blok.TimeLefttoComplete > 0 && blok.TimeLefttoComplete < 120)   //2 minute warning
+                        blok.Warning = true;
+                   
                 }
 
             }
@@ -838,40 +833,20 @@ namespace formEditor
                    
                 }
                 selectedBlock = BlockNames[currentBlockIndex];
-                BlockSelector.SelectedIndex += 1;
                 timeElapsed = 0;
                 Start.Visibility = Visibility.Visible;
                 itemNumber = -1;
           //      Progress.Value = 0;
                 Refresh();
                 rootGrid.IsEnabled = false;
-                BlockSelector.IsEnabled = true;
                 passwordEntered.IsEnabled = true;
                 return;
 
             }
-            //Progress.Value = numLeft / initialQuestions * 100;
-            //if (Progress.Value > 40)
-            //    Progress.Foreground = new SolidColorBrush(Colors.Azure);
-            timeElapsed += 10;
-            if  (timeElapsed > block.timer * 60 )
-            {
-                MessageBox.Show("work was not completed in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
-                timer.Stop();
-                BlockSelector.IsEnabled = true;
-                passwordEntered.IsEnabled = true;
-            }
+            
         }
 
-        private void BlockSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            currentBlockIndex = BlockSelector.SelectedIndex;
-            selectedBlock = BlockNames[currentBlockIndex];
-            Start.Visibility = Visibility.Visible;
-            itemNumber = -1;
-            Refresh();
-            rootGrid.IsEnabled = false;
-        }
+      
         private void BlockInfo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             currentBlockIndex = blockinfo.SelectedIndex;
@@ -976,6 +951,7 @@ namespace formEditor
         public int lastLineNumber { get; set; }
         public double TimeLeft  { get; set; }
         public bool bActive { get; set; }
+        public bool bMessageShown { get; set; }
     }
     public class BackgroundColourConverter : IValueConverter
     {

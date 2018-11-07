@@ -121,6 +121,10 @@
     <Compile Include="Migrations\201811061920034_selected.Designer.cs">
       <DependentUpon>201811061920034_selected.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201811071938166_timedout.cs" />
+    <Compile Include="Migrations\201811071938166_timedout.Designer.cs">
+      <DependentUpon>201811071938166_timedout.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Block.cs" />
     <Compile Include="SharedCode.cs" />
@@ -205,6 +209,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201811061920034_selected.resx">
       <DependentUpon>201811061920034_selected.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201811071938166_timedout.resx">
+      <DependentUpon>201811071938166_timedout.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
