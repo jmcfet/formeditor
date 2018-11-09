@@ -1,10 +1,13 @@
 ﻿using formEditor.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -62,13 +65,13 @@ namespace formEditor
             blockinfo.DataContext = blocks;
             
             BlockNames = new List<string>();
-                foreach(Block blok in blocks)
-                {
-                    blok.TimeLefttoComplete = blok.timer * 60;
-                    info info = new info() { lastLineNumber = 0, TimeLeft = 0 , bActive = false};
-                    propsnotinDB.Add(blok.Name,info);
-                    BlockNames.Add(blok.Name);
-                }
+            foreach(Block blok in blocks)
+            {
+                blok.TimeLefttoComplete = blok.timer * 60;
+                info info = new info() { lastLineNumber = 0, TimeLeft = 0 , bActive = false};
+                propsnotinDB.Add(blok.Name,info);
+                BlockNames.Add(blok.Name);
+            }
             selectedBlock = BlockNames[0];
             Start.Visibility = Visibility.Visible;
             itemNumber = -1;
@@ -800,10 +803,10 @@ namespace formEditor
                     {
                         blok.Warning = false;
                         blok.TimedOut = true;
-                        MessageBox.Show("work was not completed in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
-                        // propsnotinDB[blok.Name].bActive = false;
+                        MessageBox.Show("work was not completed in time, manager notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
+                       
                         propsnotinDB[blok.Name].bMessageShown = true;
-                        
+                        TextManager(blok);
                         return;
                     }
                     if (blok.TimeLefttoComplete == 0)   //message was shown but still allow the user to finish block
@@ -865,9 +868,11 @@ namespace formEditor
 
         private void Configure_Click(object sender, RoutedEventArgs e)
         {
-            Admin dlg = new Admin(BlockNames);
+            Admin dlg = new Admin(blocks);
             dlg.ShowDialog();
+            Refresh();
         }
+
         public  T FindChild<T>(DependencyObject parent, string childName)
           where T : DependencyObject
         {
@@ -948,6 +953,24 @@ namespace formEditor
                 Refresh();
           
         }
+        void TextManager(Block blok)
+        {
+            var smtpServerName = ConfigurationManager.AppSettings["SmtpServer"];
+            var port = ConfigurationManager.AppSettings["Port"];
+            var senderEmailId = ConfigurationManager.AppSettings["SenderEmailId"];
+            var senderPassword = ConfigurationManager.AppSettings["SenderPassword"];
+            var smptClient = new SmtpClient(smtpServerName, Convert.ToInt32(port))
+            {
+                Credentials = new NetworkCredential(senderEmailId, senderPassword),
+                EnableSsl = true
+            };
+            string[]  unfinished = blok.questions.Where(q => q.linenum > blok.CurrentItem).OrderBy(l => l.linenum).Select(l=>l.label1).ToArray();
+            string blockName = string.Format("Block{0} ", blok.Name);
+            
+            var someString = String.Join(
+                Environment.NewLine, unfinished );
+            smptClient.Send(senderEmailId, ConfigurationManager.AppSettings["TextReceiver1"], blockName, someString);
+        }
     }
     class info
     {
@@ -956,39 +979,8 @@ namespace formEditor
         public bool bActive { get; set; }
         public bool bMessageShown { get; set; }
     }
-    public class BackgroundColourConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo
-         culture)
-        {
-            double number = 0;
-            if (value == null)
-                return new SolidColorBrush(Colors.LightGreen);
-            
-            if (value is double)
-                number = (double)value;
-           
-            if (number <= 0)
-            {
-                return new SolidColorBrush(Colors.Red);
-
-            }
-            else if (number <= 140)
-            {
-                return new SolidColorBrush(Colors.Yellow);
-            }
-            return new SolidColorBrush(Colors.LightGray);
-        }
-
-       
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return value;
-        }
-
-       
-    }
+   
+    
     public class TimeDisplay : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

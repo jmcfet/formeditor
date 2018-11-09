@@ -22,20 +22,20 @@ namespace formEditor
         List<string> BlockNames;
         List<Block> blocks;
         Block selectedBlock = null;
-        EditorDb db;
+      //  EditorDb db;
 
-        public Admin(List<string> BlockNames)
+        public Admin(List<Block> blocks)
         {
             InitializeComponent();
-            this.BlockNames = BlockNames;
+            this.blocks = blocks;
             Loaded += Admin_Loaded;
         }
 
         private void Admin_Loaded(object sender, RoutedEventArgs e)
         {
-            db = new EditorDb();
+          //  db = new EditorDb();
             
-                blocks = db.Blocks.ToList();
+            //    blocks = db.Blocks.ToList();
                 BlockNames = new List<string>();
                 blocks.ForEach(b => BlockNames.Add(b.Name));
                 Blocks.ItemsSource = BlockNames;
@@ -65,7 +65,7 @@ namespace formEditor
                 return;
             }
             selectedBlock.timer = time;
-            db.SaveChanges();
+         //   db.SaveChanges();
         }
 
         private void Add_Click(object sender, RoutedEventArgs e)
