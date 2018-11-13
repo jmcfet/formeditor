@@ -268,6 +268,11 @@ namespace formEditor
                 tb = new TextBox() { Width = 40, Height = 30 };
                 tb.Tag = item;
                 tb.KeyDown += Tb_KeyDown;
+                if (item.var2Type == 0)
+                {
+                    tb.GotKeyboardFocus += Tb_GotKeyboardFocus;
+                    tb.Width = 60;
+                }
                 tb.LostFocus += Tb_LostFocus2;
                 myBinding = setBinding();
                 myBinding.Source = item;

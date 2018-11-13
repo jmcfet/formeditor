@@ -61,7 +61,7 @@ namespace formEditor
             Carriers.Add("TMobile");
             Carrier.ItemsSource = Carriers;
             Carrier.SelectedIndex = 0;
-           
+            Remove.IsEnabled = false;
 
         }
 
@@ -141,7 +141,7 @@ namespace formEditor
 
         private void phonenumbers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-           
+            Remove.IsEnabled = true;
         }
     }
 }
