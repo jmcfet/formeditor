@@ -1,8 +1,10 @@
 ﻿using formEditor.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,26 +24,45 @@ namespace formEditor
         List<string> BlockNames;
         List<Block> blocks;
         Block selectedBlock = null;
-      //  EditorDb db;
-
+        EditorDb db;
+        List<string> numbers = new List<string>();
+        List<string> Carriers = new List<string>();
         public Admin(List<Block> blocks)
         {
             InitializeComponent();
             this.blocks = blocks;
+           
             Loaded += Admin_Loaded;
         }
 
         private void Admin_Loaded(object sender, RoutedEventArgs e)
         {
-          //  db = new EditorDb();
-            
-            //    blocks = db.Blocks.ToList();
-                BlockNames = new List<string>();
-                blocks.ForEach(b => BlockNames.Add(b.Name));
-                Blocks.ItemsSource = BlockNames;
-                Blocks.SelectedIndex = 0;
-                selectedBlock = blocks[0];
+            db = new EditorDb();
            
+            BlockNames = new List<string>();
+            blocks.ForEach(b => BlockNames.Add(b.Name));
+            Blocks.ItemsSource = BlockNames;
+            Blocks.SelectedIndex = 0;
+            for(int i =1;i < 5;i++)
+            {
+                string key = "Cell" + i.ToString();
+                var user = ConfigurationManager.AppSettings[key];
+                if (user == null)
+                    break;
+                string txtNumber = user.ToString();
+               
+                numbers.Add(txtNumber);
+            }
+            phonenumbers.ItemsSource = numbers;
+           selectedBlock = blocks[0];
+           
+            Carriers.Add("ATT");
+            Carriers.Add("Verizon");
+            Carriers.Add("TMobile");
+            Carrier.ItemsSource = Carriers;
+            Carrier.SelectedIndex = 0;
+           
+
         }
 
         private void Blocks_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -49,6 +70,7 @@ namespace formEditor
             string selectedBlock1 = BlockNames[Blocks.SelectedIndex];
             Block b = blocks.Where(b1 => b1.Name == selectedBlock1).SingleOrDefault();
             Timeout.Text = b.timer.ToString();
+            Save.Content = "Save";
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -65,12 +87,61 @@ namespace formEditor
                 return;
             }
             selectedBlock.timer = time;
-         //   db.SaveChanges();
+            selectedBlock.TimeLefttoComplete = 60 * time;
+            Save.Content = "Done";
+            db.SaveChanges();
         }
-
+        
         private void Add_Click(object sender, RoutedEventArgs e)
         {
+            //use regex to remove all the non-numerics
+            string pattern = @"\d";
+            StringBuilder sb = new StringBuilder();
+            foreach (Match m in Regex.Matches(phonenumber.Text, pattern))
+            {
+                sb.Append(m);
+            }
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            //ge the carrier email from appsettings
+            var carrierEmail = ConfigurationManager.AppSettings[carrier];
+            if (carrierEmail == null)
+            {
+                MessageBox.Show("invalid carrier");
+                return;
+            }
+           
+            string num = sb.ToString() + "@" + carrierEmail.ToString();
+            numbers.Add(num);
+            phonenumbers.Items.Refresh();
+            string key = "Cell" + numbers.Count.ToString();
+            config.AppSettings.Settings.Add(key,num);
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
 
+
+        }
+
+        
+        private void Remove_Click(object sender, RoutedEventArgs e)
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            string id = numbers[phonenumbers.SelectedIndex];
+            numbers.RemoveAt(phonenumbers.SelectedIndex);
+            phonenumbers.Items.Refresh();
+            config.AppSettings.Settings.Remove(id);
+            config.Save(ConfigurationSaveMode.Modified);
+
+            ConfigurationManager.RefreshSection("appSettings");
+        }
+        string carrier;
+        private void Carrier_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+             carrier = Carriers[Carrier.SelectedIndex];
+        }
+
+        private void phonenumbers_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+           
         }
     }
 }

@@ -3,21 +3,47 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:formEditor"
         mc:Ignorable="d"
-        Title="Admin" Height="200" Width="800">
+        Title="Admin" Height="300" Width="800">
     <Grid Margin="0,0,0.333,-102.333"  >
-        <ComboBox Name="Blocks" HorizontalAlignment="Left" Margin="247,61,0,0" VerticalAlignment="Top" Width="41" SelectionChanged="Blocks_SelectionChanged"/>
+        <TabControl Grid.Row="0" HorizontalAlignment="Left"
+                    Height="299"
+                    Margin="10,10,0,0"
+                    VerticalAlignment="Top"
+                    Width="900"
+                    Name="Types"
+                    >
+            <TabItem Header="Timeout">
+                <Grid Background="#FFE5E5E5">
+                    <ComboBox Name="Blocks" HorizontalAlignment="Left" Margin="247,61,0,0" VerticalAlignment="Top" Width="41" SelectionChanged="Blocks_SelectionChanged"/>
         <TextBox Name="Timeout" HorizontalAlignment="Left" Height="23" Margin="316,61,0,0" TextWrapping="Wrap" Style="{StaticResource MyWaterMarkStyle}" Text="time in minutes" VerticalAlignment="Top" Width="99"/>
         <Button Name="Save" Content="Save" HorizontalAlignment="Left" Margin="442,60,0,0" VerticalAlignment="Top" Width="60" Click="Save_Click" RenderTransformOrigin="0.5,0.5">
 
         </Button>
-        <TextBox Style="{StaticResource MyWaterMarkStyle}" HorizontalAlignment="Left" Height="23" Margin="292,190,0,0" TextWrapping="Wrap" Text="Enter 10 digit number" VerticalAlignment="Top" Width="141"/>
+       
         <Label Content="Select time in minutes for block completion " HorizontalAlignment="Left" Margin="192,10,0,0"  FontSize="20" VerticalAlignment="Top" Width="395"/>
         <Label Content="Press save after entering each block time " HorizontalAlignment="Left" Margin="215,97,0,0" VerticalAlignment="Top" Width="226"/>
         <Label Content="Block number" HorizontalAlignment="Left" Margin="152,60,0,0" VerticalAlignment="Top" Height="23" Width="82"/>
-        <Label Content="Manage Text Recipients " HorizontalAlignment="Left" Margin="175,148,0,0" VerticalAlignment="Top" Width="304" FontSize="20"/>
-        <ListBox HorizontalAlignment="Left" Height="77" Margin="134,190,0,0" VerticalAlignment="Top" Width="100"/>
+           </Grid>
+    </TabItem>
+            <TabItem Header="Text Receipients">
+                <Grid Background="#FFE5E5E5">
+                    <Label Content="Manage Text Recipients " HorizontalAlignment="Left" Margin="263,10,0,0" VerticalAlignment="Top" Width="304" FontSize="20"/>
 
-    </Grid>
+                    <xctk:MaskedTextBox x:Name="phonenumber" HorizontalAlignment="Left" Height="32" Margin="93,93,0,0"  FontSize="20
+                            " VerticalAlignment="Top" Width="121"
+                             Mask="(000) 000-0000"  />
+                    <ListBox Name="phonenumbers" HorizontalAlignment="Left" Height="77" Margin="423,93,0,0" VerticalAlignment="Top" Width="144" SelectionChanged="phonenumbers_SelectionChanged"/>
+                    <Button Name="Add" Content="Add" HorizontalAlignment="Left" Margin="343,94,0,0" VerticalAlignment="Top" Width="58" Click="Add_Click"/>
+                    <Button Name="Remove" Content="Remove" HorizontalAlignment="Left" Margin="589,95,0,0" VerticalAlignment="Top" Width="61" Click="Remove_Click" RenderTransformOrigin="0.667,-0.767"/>
+                    <ComboBox Name="Carrier" HorizontalAlignment="Left" Margin="240,93,0,0" VerticalAlignment="Top" Width="70" SelectionChanged="Carrier_SelectionChanged"/>
+                    <Label Content="cell number" HorizontalAlignment="Left" Margin="111,62,0,0" VerticalAlignment="Top" Width="80"/>
+                    <Label Content="Carrier" HorizontalAlignment="Left" Margin="240,62,0,0" VerticalAlignment="Top" Width="60"/>
+
+                </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
 </Window>

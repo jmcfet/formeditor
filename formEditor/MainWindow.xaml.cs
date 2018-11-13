@@ -971,6 +971,11 @@ namespace formEditor
                 Environment.NewLine, unfinished );
             smptClient.Send(senderEmailId, ConfigurationManager.AppSettings["TextReceiver1"], blockName, someString);
         }
+
+        private void SetTime_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
     class info
     {
