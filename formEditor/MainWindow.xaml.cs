@@ -28,7 +28,7 @@ namespace formEditor
     /// </summary>
     public partial class MainWindow : Window
     {
-        enum vartype { date,integer};
+        enum vartype { time,integer,dayweek};
         List<FormEntry> lines;
         Dictionary<string,info> propsnotinDB = new Dictionary<string, info>();
         // Grid rootGrid;
@@ -132,7 +132,7 @@ namespace formEditor
             FormEntry olditem = null;
             //    rootGrid = LayoutRoot;
 
-            rootGrid.Background = new SolidColorBrush(Colors.White); ;
+            
             rootGrid.Margin = new Thickness(10.0);
 
             for (int i = 0; i < lines.Count * 2; i++)
@@ -253,8 +253,11 @@ namespace formEditor
             sp.Tag = item;
             sp.Children.Add(CreateLabel(item.label1, item.isBold));
             TextBox tb = new TextBox() { Width = 60, Height = 30 };
+            if (item.var1Type == (int)vartype.dayweek)
+               tb.Width = 100;
+            
             tb.Tag = item;
-            tb.PreviewMouseLeftButtonDown += Tb_MouseLeftButtonDown;
+            tb.PreviewMouseLeftButtonDown += Tb_MouseLeftButtonDownTB1;
             tb.KeyDown += Tb_KeyDown;
             tb.LostFocus += Tb_LostFocus1;
             Binding myBinding = setBinding();
@@ -270,7 +273,7 @@ namespace formEditor
                 tb = new TextBox() { Width = 40, Height = 30 };
                 tb.Tag = item;
                 tb.KeyDown += Tb_KeyDown;
-                if (item.var2Type == (int)vartype.date)
+                if (item.var2Type == (int)vartype.time)
                 {
                   
                     tb.Width = 60;
@@ -304,17 +307,27 @@ namespace formEditor
         {
             TextBox tb = sender as TextBox;
             FormEntry entry = tb.Tag as FormEntry;
-            if (entry.var2Type == (int)vartype.date)
+            if (entry.var2Type == (int)vartype.time)
             {
                 
                 tb.Text = DateTime.Now.ToShortTimeString();
             }
         }
 
-        private void Tb_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Tb_MouseLeftButtonDownTB1(object sender, MouseButtonEventArgs e)
         {
+            
             TextBox tb = sender as TextBox;
-            tb.Text = DateTime.Now.ToShortTimeString();
+            FormEntry entry = tb.Tag as FormEntry;
+            if (entry.var1Type == (int)vartype.time)
+            {
+
+                tb.Text = DateTime.Now.ToShortTimeString();
+            }
+            else if (entry.var1Type == (int)vartype.dayweek)
+            {
+                tb.Text = DateTime.Now.DayOfWeek.ToString();
+            }
         }
 
         private void Tb_KeyDown(object sender, KeyEventArgs e)
@@ -803,6 +816,7 @@ namespace formEditor
         {
           
             rootGrid.IsEnabled = true;
+            rootGrid.Background = new SolidColorBrush(Colors.White);
             if (timer == null)
             {
                 timer = new DispatcherTimer();
