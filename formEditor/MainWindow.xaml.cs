@@ -28,6 +28,7 @@ namespace formEditor
     /// </summary>
     public partial class MainWindow : Window
     {
+        enum vartype { date,integer};
         List<FormEntry> lines;
         Dictionary<string,info> propsnotinDB = new Dictionary<string, info>();
         // Grid rootGrid;
@@ -225,7 +226,7 @@ namespace formEditor
 
         private void Tb_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-           TextBox tb = sender as TextBox;
+            TextBox tb = sender as TextBox;
             tb.Text = DateTime.Now.ToShortTimeString();
         }
 
@@ -253,7 +254,7 @@ namespace formEditor
             sp.Children.Add(CreateLabel(item.label1, item.isBold));
             TextBox tb = new TextBox() { Width = 60, Height = 30 };
             tb.Tag = item;
-            tb.GotKeyboardFocus += Tb_GotKeyboardFocus;
+            tb.PreviewMouseLeftButtonDown += Tb_MouseLeftButtonDown;
             tb.KeyDown += Tb_KeyDown;
             tb.LostFocus += Tb_LostFocus1;
             Binding myBinding = setBinding();
@@ -269,12 +270,14 @@ namespace formEditor
                 tb = new TextBox() { Width = 40, Height = 30 };
                 tb.Tag = item;
                 tb.KeyDown += Tb_KeyDown;
-                if (item.var2Type == 0)
+                if (item.var2Type == (int)vartype.date)
                 {
-                    tb.GotKeyboardFocus += Tb_GotKeyboardFocus;
+                  
                     tb.Width = 60;
                 }
+             
                 tb.LostFocus += Tb_LostFocus2;
+                tb.PreviewMouseLeftButtonDown += Tb_PreviewMouseLeftButtonDownTB2;
                 myBinding = setBinding();
                 myBinding.Source = item;
                 myBinding.Path = new PropertyPath("Var2");
@@ -295,6 +298,23 @@ namespace formEditor
                 //sp.Children.Add(CreateTextInputBlock("    "));
             }
             row += 1;
+        }
+        //user clicked in tetbox 2
+        private void Tb_PreviewMouseLeftButtonDownTB2(object sender, MouseButtonEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            FormEntry entry = tb.Tag as FormEntry;
+            if (entry.var2Type == (int)vartype.date)
+            {
+                
+                tb.Text = DateTime.Now.ToShortTimeString();
+            }
+        }
+
+        private void Tb_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            tb.Text = DateTime.Now.ToShortTimeString();
         }
 
         private void Tb_KeyDown(object sender, KeyEventArgs e)
@@ -991,7 +1011,7 @@ namespace formEditor
                 if (val == null)
                     continue;
                    
-                smptClient.Send(senderEmailId, val, "Block " + blok.Name, someString);
+            //    smptClient.Send(senderEmailId, val, "Block " + blok.Name, someString);
                 
             }
             
