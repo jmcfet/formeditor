@@ -79,13 +79,14 @@ namespace formEditor
             rootGrid.IsEnabled = false;
                    
             Start.Visibility = Visibility.Visible;
-            
+            UpdateTextReceivers();
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (bEntryMode)
                 return;
+           
             Button but = sender as Button;
             if (selectedItem == null)
             {
@@ -364,7 +365,7 @@ namespace formEditor
 
                 removeline(entry);
                               
-                CheckForFinish();
+            //    CheckForFinish(block);
                
             }
 
@@ -398,7 +399,7 @@ namespace formEditor
             {
                 removeline(entry);
 
-                CheckForFinish();
+              //  CheckForFinish(block);
                
             }
               //  rootGrid.Children.Remove(sptest);
@@ -562,7 +563,7 @@ namespace formEditor
             if (bDelete)
             {
                 removeline(entry);
-                CheckForFinish();
+             //   CheckForFinish(block);
                 //buts.ForEach(b => rootGrid.Children.Remove(b));
                 //stacks.ForEach(s => rootGrid.Children.Remove(s));
                 //buts.Clear();
@@ -606,7 +607,7 @@ namespace formEditor
             if (bDelete)
             {
                 removeline(entry);
-               CheckForFinish();
+          //     CheckForFinish(block);
             }
 
         }
@@ -664,7 +665,8 @@ namespace formEditor
             //}
             lines.Remove(item);
             itemNumber = -1;
-         
+            CheckForFinish(block);
+
         }
        void FindType(FormEntry item,Type type)
        {
@@ -811,23 +813,26 @@ namespace formEditor
                         MessageBox.Show("work was not completed in time, manager notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
                        
                         propsnotinDB[blok.Name].bMessageShown = true;
-                        TextManager(blok);
+                        TextManager(blok,false);
                         return;
                     }
                     if (blok.TimeLefttoComplete == 0)   //message was shown but still allow the user to finish block
                         return;
                     blok.TimeLefttoComplete -= 1;
                     if (blok.TimeLefttoComplete > 0 && blok.TimeLefttoComplete < 120)   //2 minute warning
+                    {
                         blok.Warning = true;
-                   
+                        return;
+                    }
+                    CheckForFinish(blok);
                 }
 
             }
-        //    CheckForFinish();
+          
 
 
         }
-        void CheckForFinish()
+        void CheckForFinish(Block blok)
         { 
             double numLeft = lines.Where(l => l.type != 3).Count();
             if (numLeft == 0)
@@ -835,11 +840,8 @@ namespace formEditor
                 
                 timer.Stop();
                 currentBlockIndex += 1;
-                if (currentBlockIndex == BlockNames.Count())
-                {
-                    MessageBox.Show("all work done work ", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
-                   
-                }
+                TextManager(blok, true);
+                blockinfo.SelectedIndex = currentBlockIndex;
                 selectedBlock = BlockNames[currentBlockIndex];
                 timeElapsed = 0;
                 Start.Visibility = Visibility.Visible;
@@ -958,7 +960,7 @@ namespace formEditor
                 Refresh();
           
         }
-        void TextManager(Block blok)
+        void TextManager(Block blok,bool bSuccess)
         {
             var smtpServerName = ConfigurationManager.AppSettings["SmtpServer"];
             var port = ConfigurationManager.AppSettings["Port"];
@@ -969,14 +971,71 @@ namespace formEditor
                 Credentials = new NetworkCredential(senderEmailId, senderPassword),
                 EnableSsl = true
             };
-            string[]  unfinished = blok.questions.Where(q => q.linenum > blok.CurrentItem).OrderBy(l => l.linenum).Select(l=>l.label1).ToArray();
-            string blockName = string.Format("Block{0} ", blok.Name);
-            
-            var someString = String.Join(
-                Environment.NewLine, unfinished );
-            smptClient.Send(senderEmailId, ConfigurationManager.AppSettings["TextReceiver1"], blockName, someString);
-        }
+            string someString;
+            if (bSuccess)
+            {
+                someString =  "finished in time";
+            }
+            else
+            {
+                string[] unfinished = blok.questions.Where(q => q.linenum > blok.CurrentItem).OrderBy(l => l.linenum).Select(l => l.label1).ToArray();
+                string blockName = string.Format("Block{0} ", blok.Name);
 
+                someString = String.Join(
+                   Environment.NewLine, unfinished);
+            }
+            for (int i = 1; i < 5; i++)
+            {
+                string key = "Cell" + i.ToString();
+                string val = ConfigurationManager.AppSettings[key];
+                if (val == null)
+                    continue;
+                   
+                smptClient.Send(senderEmailId, val, "Block " + blok.Name, someString);
+                
+            }
+            
+        }
+        void UpdateTextReceivers()
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            //ge the carrier email from appsettings
+            var carrierEmail = ConfigurationManager.AppSettings["Verizon"];
+            //string num = "3523592965" + "@" + carrierEmail.ToString();
+            //bool bFound = false;
+            //int index = 1;
+            //for (int i = 1; i < 5; i++)
+            //{
+            //    string key = "Cell" + i.ToString();
+            //    string val = ConfigurationManager.AppSettings[key];
+            //    if (val == null )
+            //    {
+            //        index = i;
+            //        break;
+            //    }
+                    
+            //    if (val == num)
+            //    {
+            //        bFound = true;
+            //        break;
+            //    }
+            //}
+
+            string num = "3523592965" + "@" + carrierEmail.ToString();
+            string val = ConfigurationManager.AppSettings["cell1"];
+            if (val == null)
+            {
+                config.AppSettings.Settings.Add("Cell1", num);
+            }
+            num = "3525147573" + "@" + carrierEmail.ToString();
+            val = ConfigurationManager.AppSettings["cell2"];
+            if (val == null)
+            {
+                config.AppSettings.Settings.Add("Cell2", num);
+            }
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
+        }
         private void SetTime_Click(object sender, RoutedEventArgs e)
         {
 

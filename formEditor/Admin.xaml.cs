@@ -113,6 +113,7 @@ namespace formEditor
             string num = sb.ToString() + "@" + carrierEmail.ToString();
             numbers.Add(num);
             phonenumbers.Items.Refresh();
+            //add to end of appconfig file
             string key = "Cell" + numbers.Count.ToString();
             config.AppSettings.Settings.Add(key,num);
             config.Save(ConfigurationSaveMode.Modified);
@@ -128,10 +129,23 @@ namespace formEditor
             string id = numbers[phonenumbers.SelectedIndex];
             numbers.RemoveAt(phonenumbers.SelectedIndex);
             phonenumbers.Items.Refresh();
-            config.AppSettings.Settings.Remove(id);
-            config.Save(ConfigurationSaveMode.Modified);
+            //now find the key for this entry in app.config settings
+            for (int i = 1; i < 5; i++)
+            {
+                string key = "Cell" + i.ToString();
+                string val = ConfigurationManager.AppSettings[key];
+                if (val == null)
+                    break;
+                if (val == id)
+                {
+                    config.AppSettings.Settings.Remove(key);
+                    config.Save(ConfigurationSaveMode.Modified);
 
-            ConfigurationManager.RefreshSection("appSettings");
+                    ConfigurationManager.RefreshSection("appSettings");
+                }
+            }
+            
+           
         }
         string carrier;
         private void Carrier_SelectionChanged(object sender, SelectionChangedEventArgs e)
