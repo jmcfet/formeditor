@@ -33,7 +33,7 @@ namespace formEditor
         Dictionary<string,info> propsnotinDB = new Dictionary<string, info>();
         // Grid rootGrid;
         int row = 0;
-        int formRowSelected = -1;
+      
         FormEntry selectedItem = null;
         Brush oldSelectedBrush = null;
         StackPanel oldSelectedRow = null;
@@ -96,10 +96,10 @@ namespace formEditor
             }
             using (var db = new EditorDb())
             {
-                FormEntry item = block.questions.Where(i => i.linenum == formRowSelected).SingleOrDefault();
+                FormEntry item = block.questions.Where(i => i.linenum == selectedItem.linenum).SingleOrDefault();
                block.questions.Remove(selectedItem);
                 db.Entry(selectedItem).State = System.Data.Entity.EntityState.Deleted;
-                for (int line = formRowSelected + 1; line <= lines.Count; line++)
+                for (int line = selectedItem.linenum + 1; line <= lines.Count; line++)
                 {
                     item = block.questions.Where(i => i.linenum == line).SingleOrDefault();
                     item.linenum = item.linenum - 1;
@@ -107,7 +107,7 @@ namespace formEditor
 
                 }
                 db.SaveChanges();
-                MessageBox.Show(string.Format("Line {0} removed", formRowSelected));
+             //   MessageBox.Show(string.Format("Line {0} removed", formRowSelected));
                 Refresh();
             }
         }
@@ -788,9 +788,9 @@ namespace formEditor
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            FormDialog dialog = new FormDialog(lines, formRowSelected,block);
+            FormDialog dialog = new FormDialog(lines, selectedItem.linenum, block);
             dialog.Closing += Dialog_Closing;
-            dialog.LineNumber = formRowSelected;
+            dialog.LineNumber = selectedItem.linenum;
             bEntryMode = false;
             dialog.ShowDialog();
         }
@@ -871,11 +871,21 @@ namespace formEditor
             double numLeft = lines.Where(l => l.type != 3).Count();
             if (numLeft == 0)
             {
-                
-                timer.Stop();
-                currentBlockIndex += 1;
+                   
+                //tell manager that the current block has finished
                 TextManager(blok, true);
+                currentBlockIndex += 1;
+                propsnotinDB[blok.Name].bActive = false;
                 blockinfo.SelectedIndex = currentBlockIndex;
+                //if finished last block we are done for day
+                if (currentBlockIndex == blocks.Count)
+                {
+                    MessageBox.Show("all blocks completed");
+                    return;
+                }
+                //set next block as active
+                Block b = blocks[currentBlockIndex];
+                propsnotinDB[b.Name].bActive = true;
                 selectedBlock = BlockNames[currentBlockIndex];
                 timeElapsed = 0;
                 Start.Visibility = Visibility.Visible;
@@ -1024,8 +1034,8 @@ namespace formEditor
                 string val = ConfigurationManager.AppSettings[key];
                 if (val == null)
                     continue;
-                   
-            //    smptClient.Send(senderEmailId, val, "Block " + blok.Name, someString);
+                string name = "Block " + blok.Name;
+                smptClient.Send(senderEmailId, val, "OTS", name + " " + someString);
                 
             }
             
@@ -1034,7 +1044,8 @@ namespace formEditor
         {
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             //ge the carrier email from appsettings
-            var carrierEmail = ConfigurationManager.AppSettings["Verizon"];
+             var carrierEmail = ConfigurationManager.AppSettings["Verizon"];
+          //  var carrierEmail = ConfigurationManager.AppSettings["TMobile"];
             //string num = "3523592965" + "@" + carrierEmail.ToString();
             //bool bFound = false;
             //int index = 1;
@@ -1047,7 +1058,7 @@ namespace formEditor
             //        index = i;
             //        break;
             //    }
-                    
+
             //    if (val == num)
             //    {
             //        bFound = true;
@@ -1056,6 +1067,7 @@ namespace formEditor
             //}
 
             string num = "3523592965" + "@" + carrierEmail.ToString();
+           // string num = "3523594634" + "@" + carrierEmail.ToString();
             string val = ConfigurationManager.AppSettings["cell1"];
             if (val == null)
             {

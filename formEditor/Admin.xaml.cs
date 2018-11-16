@@ -67,9 +67,8 @@ namespace formEditor
 
         private void Blocks_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string selectedBlock1 = BlockNames[Blocks.SelectedIndex];
-            Block b = blocks.Where(b1 => b1.Name == selectedBlock1).SingleOrDefault();
-            Timeout.Text = b.timer.ToString();
+            selectedBlock = blocks[Blocks.SelectedIndex];
+            Timeout.Text = selectedBlock.timer.ToString();
             Save.Content = "Save";
         }
 
