@@ -670,7 +670,7 @@ namespace formEditor
             FindType(selectedItem, typeof(Button));
             FindType(selectedItem, typeof(StackPanel));
          //   StackPanel lb = GetGridElement(rootGrid, (int)but.Tag, 1) as StackPanel;
-            stacks[0].Background = new SolidColorBrush(Colors.LightGray);
+            stacks[0].Background = new SolidColorBrush(Colors.DarkGray);
             if (oldSelectedRow != null)
             {
                 oldSelectedRow.Background = oldSelectedBrush;
@@ -788,9 +788,11 @@ namespace formEditor
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            FormDialog dialog = new FormDialog(lines, selectedItem.linenum, block);
+            int linenum = -1;
+            if (selectedItem != null)
+                linenum = selectedItem.linenum;
+            FormDialog dialog = new FormDialog(lines, linenum, block);
             dialog.Closing += Dialog_Closing;
-            dialog.LineNumber = selectedItem.linenum;
             bEntryMode = false;
             dialog.ShowDialog();
         }
