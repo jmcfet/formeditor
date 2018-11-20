@@ -85,7 +85,8 @@ namespace formEditor
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (bEntryMode)
+            if (bEntryMode ||  e.Key != Key.Delete)
+             
                 return;
            
             Button but = sender as Button;
@@ -766,6 +767,7 @@ namespace formEditor
                 logout.Visibility = Visibility.Visible;
                 rootGrid.IsEnabled = true;
                 bEntryMode = false;
+                Start.IsEnabled = false;
                 if (timer != null)
                     timer.Stop();
                 Refresh();
@@ -782,7 +784,7 @@ namespace formEditor
 
         private void Dialog_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            //  bEntryMode = true;
+            
             Refresh();
         }
 
@@ -975,6 +977,7 @@ namespace formEditor
             Add.Visibility = Visibility.Collapsed;
             Configure.Visibility = Visibility.Collapsed;
             logout.Visibility = Visibility.Collapsed;
+            Start.IsEnabled = true;
             bEntryMode = true;
         }
 

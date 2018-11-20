@@ -14,7 +14,7 @@
     WindowStartupLocation="CenterOwner" 
         Title="FormDialog" >
     <Window.Resources>
-        
+
     </Window.Resources>
     <Grid Name="rootGrid">
         <Grid.RowDefinitions>
@@ -135,7 +135,7 @@
                             <ComboBoxItem >Weight</ComboBoxItem>
                             <ComboBoxItem>Number</ComboBoxItem>
                         </ComboBox>
-                        
+
                     </Border>
                     <TextBox Style="{StaticResource MyWaterMarkStyle}"
                         HorizontalAlignment="Left"
@@ -290,15 +290,11 @@
                            Grid.Row="0"
                               />
 
-            <Button Name="Next"  Grid.Column ="2" Height="60" VerticalAlignment="top"
-                           Grid.Row="2" Click="Next_Click" HorizontalAlignment="left"  Width="60" >Enter Item</Button>
-            <Button Name="Type1Done"  Grid.Column ="3" Height="60" VerticalAlignment="top"
-                           Grid.Row="2" Click="Type1Done_Click" HorizontalAlignment="Left"   Width="46" >Done</Button>
-            <Slider Width="300" Value="5" Orientation="Horizontal" HorizontalAlignment="Left" Grid.ColumnSpan="4"
-IsSnapToTickEnabled="True" Maximum="10" TickPlacement="BottomRight" 
-AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="2" 
-Ticks="0, 3, 7, 10" Grid.Column="1" Margin="37.667,51,0,51" Grid.RowSpan="3"/>
-            <Label Content="Severity:" HorizontalAlignment="Left" Margin="45,9.667,0,0" Grid.Row="1" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="73" RenderTransformOrigin="0.525,0"/>
+            <Button Name="Next"  Grid.Column ="2" Height="41" VerticalAlignment="top"
+                           Grid.Row="1" Click="Next_Click" HorizontalAlignment="left"  Width="60" >Enter Item</Button>
+            <Button Name="Type1Done"  Grid.Column ="4" Height="41" VerticalAlignment="top"
+                           Grid.Row="2" Click="Type1Done_Click" HorizontalAlignment="Left"   Width="60" Margin="91,10,0,0" >Done</Button>
+            <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" TextWrapping="Wrap" Text="add multiple questions clicking Enter Item between each then click Done when finished" VerticalAlignment="Top" Grid.ColumnSpan="4" Width="251" Height="31"/>
 
         </Grid>
     </Grid>
