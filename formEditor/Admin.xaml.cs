@@ -87,6 +87,7 @@ namespace formEditor
             }
             selectedBlock.timer = time;
             selectedBlock.TimeLefttoComplete = 60 * time;
+            db.Entry(selectedBlock).State = System.Data.Entity.EntityState.Modified;
             Save.Content = "Done";
             db.SaveChanges();
         }
