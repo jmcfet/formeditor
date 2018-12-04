@@ -887,9 +887,10 @@ namespace formEditor
                     MessageBox.Show("all blocks completed");
                     return;
                 }
-                //set next block as active
+              
+                //set next block as active but do not start timer
                 Block b = blocks[currentBlockIndex];
-                propsnotinDB[b.Name].bActive = true;
+                propsnotinDB[b.Name].bActive =false;
                 selectedBlock = BlockNames[currentBlockIndex];
                 timeElapsed = 0;
                 Start.Visibility = Visibility.Visible;
