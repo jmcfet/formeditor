@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,6 +16,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -49,12 +51,14 @@ namespace formEditor
         List<Block> blocks;
         List<string> BlockNames;
         int currentBlockIndex = -1;
-        string selectedBlock;
+        Block selectedBlock;
+        
         public MainWindow()
         {
             InitializeComponent();
-           
+            
             KeyDown += MainWindow_KeyDown;
+            Closing += MainWindow_Closing;
             using (var db = new EditorDb())
             {
 
@@ -68,19 +72,29 @@ namespace formEditor
             BlockNames = new List<string>();
             foreach(Block blok in blocks)
             {
+                
                 blok.TimeLefttoComplete = blok.timer * 60;
                 info info = new info() { lastLineNumber = 0, TimeLeft = 0 , bActive = false};
                 propsnotinDB.Add(blok.Name,info);
                 BlockNames.Add(blok.Name);
             }
-            selectedBlock = BlockNames[0];
-            Start.Visibility = Visibility.Visible;
+            selectedBlock = blocks[0];
+            
             itemNumber = -1;
             Refresh();
             rootGrid.IsEnabled = false;
-                   
-            Start.Visibility = Visibility.Visible;
-            UpdateTextReceivers();
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(60);
+            timer.Tick += Timer_Tick;
+            timer.Start();
+
+
+
+        }
+        //prevent user from closing app
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -115,10 +129,8 @@ namespace formEditor
 
         void Refresh()
         {
-  
-            block = blocks.Where(b => b.Name == selectedBlock)
-                
-                     .SingleOrDefault();
+
+            block = selectedBlock;
        
             info info = propsnotinDB[block.Name];
             lines = block.questions.Where(q=>q.linenum > block.CurrentItem).OrderBy(l => l.linenum).ToList();
@@ -758,23 +770,7 @@ namespace formEditor
             return RowDefinition;
         }
 
-        private void passwordEntered_Click(object sender, RoutedEventArgs e)
-        {
-            if (passwordBox1.Password == "tennis")
-            {
-                Add.Visibility = Visibility.Visible;
-                Configure.Visibility = Visibility.Visible;
-                logout.Visibility = Visibility.Visible;
-                rootGrid.IsEnabled = true;
-                bEntryMode = false;
-                Start.IsEnabled = false;
-                if (timer != null)
-                    timer.Stop();
-                Refresh();
-            }
-           
-        }
-
+        
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
             bEntryMode = false;
@@ -821,45 +817,73 @@ namespace formEditor
           
             rootGrid.IsEnabled = true;
             rootGrid.Background = new SolidColorBrush(Colors.White);
-            if (timer == null)
-            {
-                timer = new DispatcherTimer();
-                timer.Interval = TimeSpan.FromSeconds(1);
-                timer.Tick += Timer_Tick;
-                timer.Start();
-            }
+           
           //  if (propsnotinDB[block.Name].bCompleted)
-            propsnotinDB[block.Name].bActive = true;
-            passwordEntered.IsEnabled = true;
-            
+           block.bActive = true;
+           block.bnMinuteWarningSent = false;
+            block.bWorkNotFinishedinTime = false;
+            timer.Stop();
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Start();
+            //   passwordEntered.IsEnabled = true;
+
         }
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            // MessageBox.Show("work was not copleted in time, manager will be notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
-            //  timer.Stop();
-           
+            //look for first block that did not start in time
+            
             foreach (Block blok in blocks)
             {
-                if (propsnotinDB[blok.Name].bActive)
+                //each block of work has an expected start time and if it is passed then imform the managers
+                TimeSpan expected = blok.ExpectedStart;
+                DateTime now = DateTime.Now;
+                DateTime eTime = new DateTime(now.Year, now.Month, now.Day, expected.Hours, expected.Minutes, 0);
+                if (DateTime.Now > eTime && !blok.bExpectedMessageSent && !blok.bActive)
                 {
-                    
-                    if (blok.TimeLefttoComplete == 0 && !propsnotinDB[blok.Name].bMessageShown)
+                    TextManager(blok, "did not start in time");
+                    blok.bExpectedMessageSent = true;
+                    return;
+                }
+            }
+            //now look for blocks that did not complate in time
+            foreach (Block blok in blocks)
+            {
+                
+                if (blok.bActive)
+                {
+                    //clock ran out tell manager
+                    if (blok.TimeLefttoComplete == 0 && !blok.bWorkNotFinishedinTime)
                     {
                         blok.Warning = false;
                         blok.TimedOut = true;
                         MessageBox.Show("work was not completed in time, manager notified", "Severe Error", MessageBoxButton.OK, MessageBoxImage.Stop);
                        
-                        propsnotinDB[blok.Name].bMessageShown = true;
-                        TextManager(blok,false);
+                        blok.bWorkNotFinishedinTime = true;
+                        //did not complete in time so tell managers that and the unfinished questions
+                        string[] unfinished = blok.questions.Where(q => q.linenum > blok.CurrentItem).OrderBy(l => l.linenum).Select(l => l.label1).ToArray();
+                        
+
+                        string someString = String.Join(
+                           Environment.NewLine, unfinished);
+                        TextManager(blok, someString);
                         return;
                     }
                     if (blok.TimeLefttoComplete == 0)   //message was shown but still allow the user to finish block
                         return;
                     blok.TimeLefttoComplete -= 1;
-                    if (blok.TimeLefttoComplete > 0 && blok.TimeLefttoComplete < 120)   //2 minute warning
+                    if ( blok.TimeLefttoComplete < 120)   //2 minute warning
                     {
                         blok.Warning = true;
+                        return;
+                    }
+                    if ( blok.TimeLefttoComplete < 300 && !blok.bnMinuteWarningSent)   //5 minute warningtext the user
+                    {
+                        string message = string.Format("5 minutes left to complete block {0}", block.Name);
+                        var carrierEmailServer = ConfigurationManager.AppSettings[((App)Application.Current).activeUser.carrier];
+                        
+                        sendText(((App)Application.Current).activeUser.phoneNumber + "@" + carrierEmailServer, message );
+                        blok.bnMinuteWarningSent = true;
                         return;
                     }
                     CheckForFinish(blok);
@@ -877,28 +901,36 @@ namespace formEditor
             {
                    
                 //tell manager that the current block has finished
-                TextManager(blok, true);
+                TextManager(blok, "finished in time");
                 currentBlockIndex += 1;
-                propsnotinDB[blok.Name].bActive = false;
+                blok.bActive = false;
                 blockinfo.SelectedIndex = currentBlockIndex;
                 //if finished last block we are done for day
                 if (currentBlockIndex == blocks.Count)
                 {
                     MessageBox.Show("all blocks completed");
+                    selectedBlock =blocks[0];
+                    blockinfo.SelectedIndex = 0;
+                    Login.Content = "Login";
+
+                    UserAdmin.Visibility = Visibility.Collapsed;
+                    ((App)Application.Current).activeUser = null;
+                    Start.IsEnabled = false;
+                    Refresh();
                     return;
                 }
-              
+
                 //set next block as active but do not start timer
-                Block b = blocks[currentBlockIndex];
-                propsnotinDB[b.Name].bActive =false;
-                selectedBlock = BlockNames[currentBlockIndex];
+                selectedBlock = blocks[currentBlockIndex];
+                blok.bActive =false;
+               
                 timeElapsed = 0;
                 Start.Visibility = Visibility.Visible;
                 itemNumber = -1;
           //      Progress.Value = 0;
                 Refresh();
                 rootGrid.IsEnabled = false;
-                passwordEntered.IsEnabled = true;
+              
                 return;
 
             }
@@ -911,9 +943,9 @@ namespace formEditor
             currentBlockIndex = blockinfo.SelectedIndex;
             if (BlockNames == null)
                 return;
-            selectedBlock = BlockNames[currentBlockIndex];
+            selectedBlock = blocks[currentBlockIndex];
             Start.Content = "Start";
-            if (propsnotinDB[selectedBlock].bActive)
+            if (selectedBlock.bActive)
                 Start.Content = "Resume";
             Start.Visibility = Visibility.Visible;
             itemNumber = -1;
@@ -980,37 +1012,29 @@ namespace formEditor
             logout.Visibility = Visibility.Collapsed;
             Start.IsEnabled = true;
             bEntryMode = true;
+            UserAdmin.Visibility = Visibility.Collapsed;
         }
 
-        private void chooseBlock_Click(object sender, RoutedEventArgs e)
+        
+        void TextManager(Block blok,string messagein)
         {
-            Button but = sender as Button;
-            StackPanel sp = but.Content as StackPanel;
-            string blockName = string.Empty;
-            for (int i = 0; i < sp.Children.Count; i++)
+            List<User> admins = null;
+            using (var db = new EditorDb())
             {
-                UIElement element = sp.Children[i];
-                TextBlock tb = sp.Children[i] as TextBlock;
-                if (tb != null && tb.Name == "button")
-                {
-                    blockName = tb.Text;
-                    break;
-                }
+                 admins = db.Users.Where(u => u.Level == 1).ToList();
             }
-                if (blockName == string.Empty ||blockName == selectedBlock)
-                    return;
-                selectedBlock = blockName;
+            
+            string message =  string.Format("Block{0} ", blok.Name) + messagein;
            
-          
-                Start.Visibility = Visibility.Visible;
-                itemNumber = -1;
-                Start.Content = "Start";
-                if (propsnotinDB[blockName].bActive)
-                    Start.Content = "Resume";
-                Refresh();
-          
+            foreach(User user in admins)
+            {
+                var carrierEmail = ConfigurationManager.AppSettings[user.carrier];
+                sendText(user.phoneNumber + "@" + carrierEmail, message);
+                
+            }
+            
         }
-        void TextManager(Block blok,bool bSuccess)
+        public static void sendText(string phonenum, string message)
         {
             var smtpServerName = ConfigurationManager.AppSettings["SmtpServer"];
             var port = ConfigurationManager.AppSettings["Port"];
@@ -1021,76 +1045,52 @@ namespace formEditor
                 Credentials = new NetworkCredential(senderEmailId, senderPassword),
                 EnableSsl = true
             };
-            string someString;
-            if (bSuccess)
+
+            smptClient.Send(senderEmailId, phonenum, "OTS", message);
+
+
+
+        }
+        
+        private void Login_Click(object sender, RoutedEventArgs e)
+        {
+            string lab = Login.Content as String;
+            if (lab.Contains("Logout"))   // logging out
             {
-                someString =  "finished in time";
+                Login.Content = "Login";
+                
+                UserAdmin.Visibility = Visibility.Collapsed;
+                ((App)Application.Current).activeUser = null;
+                Start.IsEnabled = false;
+                return;
+            }
+            Login login = new Login();
+            login.ShowDialog();
+            if (((App)Application.Current).activeUser.Level == 1)
+            {
+                Add.Visibility = Visibility.Visible;
+                Configure.Visibility = Visibility.Visible;
+                UserAdmin.Visibility = Visibility.Visible;
+               // logout.Visibility = Visibility.Visible;
+                rootGrid.IsEnabled = true;
+                bEntryMode = false;
+                Start.IsEnabled = false;
+                
             }
             else
             {
-                string[] unfinished = blok.questions.Where(q => q.linenum > blok.CurrentItem).OrderBy(l => l.linenum).Select(l => l.label1).ToArray();
-                string blockName = string.Format("Block{0} ", blok.Name);
-
-                someString = String.Join(
-                   Environment.NewLine, unfinished);
+                Start.Visibility = Visibility.Visible;
+                Start.IsEnabled = true;
+               
+                Refresh();
             }
-            for (int i = 1; i < 5; i++)
-            {
-                string key = "Cell" + i.ToString();
-                string val = ConfigurationManager.AppSettings[key];
-                if (val == null)
-                    continue;
-                string name = "Block " + blok.Name;
-                smptClient.Send(senderEmailId, val, "OTS", name + " " + someString);
-                
-            }
-            
+            Login.Content = "Logout " + ((App)Application.Current).activeUser.Name;
         }
-        void UpdateTextReceivers()
+
+        private void UserAdmin_Click(object sender, RoutedEventArgs e)
         {
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            //ge the carrier email from appsettings
-             var carrierEmail = ConfigurationManager.AppSettings["Verizon"];
-          //  var carrierEmail = ConfigurationManager.AppSettings["TMobile"];
-            //string num = "3523592965" + "@" + carrierEmail.ToString();
-            //bool bFound = false;
-            //int index = 1;
-            //for (int i = 1; i < 5; i++)
-            //{
-            //    string key = "Cell" + i.ToString();
-            //    string val = ConfigurationManager.AppSettings[key];
-            //    if (val == null )
-            //    {
-            //        index = i;
-            //        break;
-            //    }
-
-            //    if (val == num)
-            //    {
-            //        bFound = true;
-            //        break;
-            //    }
-            //}
-
-            string num = "3523592965" + "@" + carrierEmail.ToString();
-           // string num = "3523594634" + "@" + carrierEmail.ToString();
-            string val = ConfigurationManager.AppSettings["cell1"];
-            if (val == null)
-            {
-                config.AppSettings.Settings.Add("Cell1", num);
-            }
-            num = "3525147573" + "@" + carrierEmail.ToString();
-            val = ConfigurationManager.AppSettings["cell2"];
-            if (val == null)
-            {
-                config.AppSettings.Settings.Add("Cell2", num);
-            }
-            config.Save(ConfigurationSaveMode.Modified);
-            ConfigurationManager.RefreshSection("appSettings");
-        }
-        private void SetTime_Click(object sender, RoutedEventArgs e)
-        {
-
+            CreateUsers dlg = new CreateUsers();
+            dlg.ShowDialog();
         }
     }
     class info
@@ -1098,7 +1098,7 @@ namespace formEditor
         public int lastLineNumber { get; set; }
         public double TimeLeft  { get; set; }
         public bool bActive { get; set; }
-        public bool bMessageShown { get; set; }
+      
     }
    
     

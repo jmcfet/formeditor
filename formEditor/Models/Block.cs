@@ -28,6 +28,11 @@ namespace formEditor.Models
        
         public string Description { get; set; }
         public double timer { get; set; }
+        public TimeSpan ExpectedStart { get; set; }
+        public bool bExpectedMessageSent { get; set; }
+        public bool bWorkNotFinishedinTime { get; set; }
+        public bool bnMinuteWarningSent { get; set; }
+        public bool bActive { get; set; }
         public double TimeLefttoComplete
         {
             get { return timeLefttoComplete; }

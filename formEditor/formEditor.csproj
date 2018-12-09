@@ -70,6 +70,8 @@
     <Compile Include="Admin.xaml.cs">
       <DependentUpon>Admin.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CreateUsers.xaml.cs" />
+    <Compile Include="Login.xaml.cs" />
     <Compile Include="Migrations\201809291307544_linenum.cs" />
     <Compile Include="Migrations\201809291307544_linenum.Designer.cs">
       <DependentUpon>201809291307544_linenum.cs</DependentUpon>
@@ -130,16 +132,37 @@
     <Compile Include="Migrations\201811071938166_timedout.Designer.cs">
       <DependentUpon>201811071938166_timedout.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201812041817417_userclass.cs" />
+    <Compile Include="Migrations\201812041817417_userclass.Designer.cs">
+      <DependentUpon>201812041817417_userclass.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201812062039097_expectedstarttimespan.cs" />
+    <Compile Include="Migrations\201812062039097_expectedstarttimespan.Designer.cs">
+      <DependentUpon>201812062039097_expectedstarttimespan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201812091919064_movecompletionfagstoblock.cs" />
+    <Compile Include="Migrations\201812091919064_movecompletionfagstoblock.Designer.cs">
+      <DependentUpon>201812091919064_movecompletionfagstoblock.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Block.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="SharedCode.cs" />
     <Page Include="Admin.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CreateUsers.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="FormDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Login.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -217,6 +240,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201811071938166_timedout.resx">
       <DependentUpon>201811071938166_timedout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201812041817417_userclass.resx">
+      <DependentUpon>201812041817417_userclass.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201812062039097_expectedstarttimespan.resx">
+      <DependentUpon>201812062039097_expectedstarttimespan.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201812091919064_movecompletionfagstoblock.resx">
+      <DependentUpon>201812091919064_movecompletionfagstoblock.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

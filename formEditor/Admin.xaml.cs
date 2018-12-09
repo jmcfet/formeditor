@@ -43,26 +43,13 @@ namespace formEditor
             blocks.ForEach(b => BlockNames.Add(b.Name));
             Blocks.ItemsSource = BlockNames;
             Blocks.SelectedIndex = 0;
-            for(int i =1;i < 5;i++)
-            {
-                string key = "Cell" + i.ToString();
-                var user = ConfigurationManager.AppSettings[key];
-                if (user == null)
-                    break;
-                string txtNumber = user.ToString();
-               
-                numbers.Add(txtNumber);
-            }
-            phonenumbers.ItemsSource = numbers;
-           selectedBlock = blocks[0];
+            Blocks2.ItemsSource = BlockNames;
+            Blocks2.SelectedIndex = 0;
            
-            Carriers.Add("ATT");
-            Carriers.Add("Verizon");
-            Carriers.Add("TMobile");
-            Carrier.ItemsSource = Carriers;
-            Carrier.SelectedIndex = 0;
-            Remove.IsEnabled = false;
-
+           selectedBlock = blocks[0];
+                  
+            startTimeBlock1.Value = Convert.ToDateTime(selectedBlock.ExpectedStart.ToString());
+            
         }
 
         private void Blocks_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -91,71 +78,20 @@ namespace formEditor
             Save.Content = "Done";
             db.SaveChanges();
         }
-        
-        private void Add_Click(object sender, RoutedEventArgs e)
+       
+        private void Blocks2_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //use regex to remove all the non-numerics
-            string pattern = @"\d";
-            StringBuilder sb = new StringBuilder();
-            foreach (Match m in Regex.Matches(phonenumber.Text, pattern))
-            {
-                sb.Append(m);
-            }
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            //ge the carrier email from appsettings
-            var carrierEmail = ConfigurationManager.AppSettings[carrier];
-            if (carrierEmail == null)
-            {
-                MessageBox.Show("invalid carrier");
-                return;
-            }
-           
-            string num = sb.ToString() + "@" + carrierEmail.ToString();
-            numbers.Add(num);
-            phonenumbers.Items.Refresh();
-            //add to end of appconfig file
-            string key = "Cell" + numbers.Count.ToString();
-            config.AppSettings.Settings.Add(key,num);
-            config.Save(ConfigurationSaveMode.Modified);
-            ConfigurationManager.RefreshSection("appSettings");
-
-
+            Block block = blocks[Blocks2.SelectedIndex];
+            startTimeBlock1.Value = Convert.ToDateTime(block.ExpectedStart.ToString());
         }
-
-        
-        private void Remove_Click(object sender, RoutedEventArgs e)
+        private void set_Click(object sender, RoutedEventArgs e)
         {
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            string id = numbers[phonenumbers.SelectedIndex];
-            numbers.RemoveAt(phonenumbers.SelectedIndex);
-            phonenumbers.Items.Refresh();
-            //now find the key for this entry in app.config settings
-            for (int i = 1; i < 5; i++)
-            {
-                string key = "Cell" + i.ToString();
-                string val = ConfigurationManager.AppSettings[key];
-                if (val == null)
-                    break;
-                if (val == id)
-                {
-                    config.AppSettings.Settings.Remove(key);
-                    config.Save(ConfigurationSaveMode.Modified);
-
-                    ConfigurationManager.RefreshSection("appSettings");
-                }
-            }
-            
-           
-        }
-        string carrier;
-        private void Carrier_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-             carrier = Carriers[Carrier.SelectedIndex];
-        }
-
-        private void phonenumbers_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            Remove.IsEnabled = true;
+            Block block = blocks[Blocks2.SelectedIndex];
+           DateTime temp = (DateTime)startTimeBlock1.Value;
+            block.ExpectedStart = temp.TimeOfDay;
+            db.Entry(block).State = System.Data.Entity.EntityState.Modified;
+            set.Content = "Done";
+            db.SaveChanges();
         }
     }
 }

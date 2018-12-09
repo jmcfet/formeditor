@@ -14,7 +14,8 @@ namespace formEditor.Models
       //      AppDomain.CurrentDomain.SetData("DataDirectory", System.IO.Directory.GetCurrentDirectory());
         }
         public DbSet<Block> Blocks { get; set; }
-      //  public DbSet<FormEntry> forms { get; set; }
-       
+        public virtual DbSet<User> Users { get; set; }
+        //  public DbSet<FormEntry> forms { get; set; }
+
     }
 }

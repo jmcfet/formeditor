@@ -1,0 +1,62 @@
+﻿<Window x:Class="formEditor.CreateUsers"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:formEditor"
+        mc:Ignorable="d"
+        Title="Administer Formeditor Users" Height="450" Width="500">
+    <Grid>
+        <Button Content="Create User" Name="CreateUser" HorizontalAlignment="Left" Margin="32,21,0,0" VerticalAlignment="Top" Width="108" Click="CreateUser_Click" Height="40"/>
+        <Button Content="Done" x:Name="Cancel" HorizontalAlignment="Left" Margin="354,21,0,0" VerticalAlignment="Top" Width="101" Click="Done_Click" Height="40" Visibility="Visible"/>
+        <Button Content="Delete User" x:Name="DeleteUser" HorizontalAlignment="Left" Margin="198,21,0,0" VerticalAlignment="Top" Width="108" Click="DeleteUser_Click" Height="40"/>
+        <Grid Name="Userstuff" Margin="0,107,0,-25" Visibility="Hidden" >
+            <StackPanel Name="UserInfo" HorizontalAlignment="Left" Height="43" Margin="47,10,0,0" VerticalAlignment="Top" Width="277" Orientation="Horizontal" Visibility="Visible">
+                <Label Content="UserName" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="77" Height="30"/>
+                <TextBox x:Name="Name" HorizontalAlignment="Left" Height="29"  TextWrapping="Wrap" VerticalAlignment="Top" Width="129"/>
+            </StackPanel>
+            <StackPanel Name="PassInfo" HorizontalAlignment="Left" Height="43" Margin="47,53,0,0" VerticalAlignment="Top" Width="307" Orientation="Horizontal" Visibility="Visible">
+                <Label Content="password" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0,0.346" Width="78" Height="29"/>
+                <PasswordBox x:Name="Password" HorizontalAlignment="Left" Height="30"  VerticalAlignment="Top" Width="191"/>
+
+            </StackPanel>
+
+            
+            <Button Content="Create" x:Name="Create" HorizontalAlignment="Left" Margin="77,232,0,0" VerticalAlignment="Top" Width="101" Click="Create_Click" Visibility="Hidden" Height="40"/>
+            <Button Content="Save" Name="Save" HorizontalAlignment="Left" Margin="380,30,0,0" VerticalAlignment="Top" Width="75" Click="Save_Click" />
+            
+            <StackPanel x:Name="phonenumber" HorizontalAlignment="Left" Height="43" Margin="47,96,0,0" VerticalAlignment="Top" Width="307" Orientation="Horizontal" Visibility="Visible">
+                <Label Content="Phone Number" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0,0.346" Width="95" Height="29">
+
+                </Label>
+                <xctk:MaskedTextBox x:Name="Phonenum" HorizontalAlignment="Left" Height="30"  FontSize="20" VerticalAlignment="Top" Width="191"
+                             Mask="(000) 000-0000"  />
+               
+
+            </StackPanel>
+            <StackPanel x:Name="Carrierinfo" HorizontalAlignment="Left" Height="170" Margin="47,139,0,0" VerticalAlignment="Top" Width="307" Orientation="Horizontal" >
+                <Label Content="Carrier" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0,0.346" Width="95"  Height="29" >
+
+                </Label>
+                <ListBox />
+                <ListBox x:Name="Carriers" HorizontalAlignment="Left" Height="150"  VerticalAlignment="Top" Width="191" SelectionChanged="Carriers_SelectionChanged"/>
+
+            </StackPanel>
+            <Button Content="Test" Name="test" HorizontalAlignment="Left" Margin="380,145,0,0" VerticalAlignment="Top" Width="75" Click="test_Click"/>
+            <CheckBox Content="Received" Name="textreceived" HorizontalAlignment="Left" Margin="384,185,0,0" VerticalAlignment="Top" Checked="textreceived_Checked"/>
+        </Grid>
+        <ListBox Name="listUsers" HorizontalAlignment="Left" ItemsSource="{Binding}" Height="100" Margin="159,148,0,0" VerticalAlignment="Top" Width="129" Visibility="Hidden">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+
+
+                    <TextBlock Text="{Binding Name}" Margin="2" />
+
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Content="Delete" Name="Delete" Margin="354,165,60,0" VerticalAlignment="Top" Visibility="Hidden" Click="Delete_Click"/>
+
+    </Grid>
+</Window>

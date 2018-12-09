@@ -1,4 +1,5 @@
-﻿using System;
+﻿using formEditor.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,7 @@ namespace formEditor
     /// </summary>
     public partial class App : Application
     {
+        public User activeUser { get; set; }
+       
     }
 }
