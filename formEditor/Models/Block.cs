@@ -33,6 +33,7 @@ namespace formEditor.Models
         public bool bWorkNotFinishedinTime { get; set; }
         public bool bnMinuteWarningSent { get; set; }
         public bool bActive { get; set; }
+        public int  state { get; set; }
         public double TimeLefttoComplete
         {
             get { return timeLefttoComplete; }

@@ -125,6 +125,9 @@
                             <DataTrigger Binding="{Binding Path = 'TimedOut'}" Value="True">
                                 <Setter Property="Background" Value="Red"/>
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding Path = 'state'}" Value="2">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding Path = 'Warning'}" Value="True">
                                 <Setter Property="Background" Value="Yellow"/>
                             </DataTrigger>

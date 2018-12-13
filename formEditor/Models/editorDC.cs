@@ -15,7 +15,7 @@ namespace formEditor.Models
         }
         public DbSet<Block> Blocks { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        //  public DbSet<FormEntry> forms { get; set; }
+        public DbSet<itemResponse> Responses { get; set; }
 
     }
 }

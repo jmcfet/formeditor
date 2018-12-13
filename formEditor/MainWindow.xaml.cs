@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -31,6 +32,7 @@ namespace formEditor
     public partial class MainWindow : Window
     {
         enum vartype { time,integer,dayweek};
+        enum states { nottarted,active,done};
         List<FormEntry> lines;
         Dictionary<string,info> propsnotinDB = new Dictionary<string, info>();
         // Grid rootGrid;
@@ -52,7 +54,11 @@ namespace formEditor
         List<string> BlockNames;
         int currentBlockIndex = -1;
         Block selectedBlock;
-        
+        DateTime startBlock;
+        DateTime instanceStart = DateTime.Now;
+        int IdleTime;
+        int idletimeout = 5;
+        List<itemResponse> responses;
         public MainWindow()
         {
             InitializeComponent();
@@ -64,6 +70,8 @@ namespace formEditor
 
                 blocks = db.Blocks
                     .Include(b => b.questions).ToList();
+                DateTime ruleData = Convert.ToDateTime(DateTime.Now).Date;
+                responses = db.Responses.Where(r => DbFunctions.TruncateTime(r.start) == ruleData).OrderBy(r=>r.Name).ThenBy(r=>r.linenum).ToList();
             }
             // blocks = db.Blocks.ToList();
             blockinfo.ItemsSource = blocks;
@@ -74,12 +82,22 @@ namespace formEditor
             {
                 
                 blok.TimeLefttoComplete = blok.timer * 60;
-                info info = new info() { lastLineNumber = 0, TimeLeft = 0 , bActive = false};
+                info info = new info() { lastLineNumber = 0, TimeLeft = 0 };
                 propsnotinDB.Add(blok.Name,info);
                 BlockNames.Add(blok.Name);
+                CheckforCompletion(blok);
             }
-            selectedBlock = blocks[0];
-            
+            int index = 0;
+            foreach (Block blok in blocks)
+            {
+                if (blok.state != (int)states.done)
+                {
+                    blockinfo.SelectedIndex = index;
+                    break;
+                }
+                index++;
+            }
+           
             itemNumber = -1;
             Refresh();
             rootGrid.IsEnabled = false;
@@ -95,6 +113,15 @@ namespace formEditor
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs args)
+        {
+            IdleTime = 0;
+        }
+
+        private void Window_PreviewMouseDown(object sender, MouseEventArgs e)
+        {
+            IdleTime = 0;
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -131,9 +158,17 @@ namespace formEditor
         {
 
             block = selectedBlock;
-       
+            
             info info = propsnotinDB[block.Name];
-            lines = block.questions.Where(q=>q.linenum > block.CurrentItem).OrderBy(l => l.linenum).ToList();
+            lines = new List<FormEntry>();
+            foreach(FormEntry line in block.questions)
+            {
+                List<itemResponse> resp = responses.Where(r => r.linenum == line.linenum && r.Name == block.Name).ToList();
+                if (resp.Count > 0)
+                    continue;
+                lines.Add(line);
+            }
+            
             row = 0;
             initialQuestions = lines.Count() - lines.Where(l => l.type == 3).Count();
             rootGrid.Children.Clear();
@@ -695,20 +730,31 @@ namespace formEditor
         List<StackPanel> stacks = new List<StackPanel>();
         void removeline(FormEntry item)
         {
-            
+            itemResponse response = new itemResponse()
+            {
+                Name = block.Name,
+                linenum = item.linenum,
+                 start = startBlock,
+                 userName = ((App)Application.Current).activeUser.Name,
+                 type = item.type,
+                var1 = item.Var1,
+                var2 = item.Var2,
+                var3 = item.Var3
+            };
             
             FindType(item, typeof(Button));
             FindType(item, typeof(StackPanel));
             buts.ForEach(b => rootGrid.Children.Remove(b));
             stacks.ForEach(s => rootGrid.Children.Remove(s));
             block.CurrentItem = item.linenum;
+            responses.Add(response);
 
-
-            //using (var db = new EditorDb())
-            //{
-            //    db.Entry(item).State = System.Data.Entity.EntityState.Modified;
-            //    db.SaveChanges();
-            //}
+            using (var db = new EditorDb())
+            {
+                // db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                db.Responses.Add(response);
+                db.SaveChanges();
+            }
             lines.Remove(item);
             itemNumber = -1;
             CheckForFinish(block);
@@ -817,10 +863,10 @@ namespace formEditor
           
             rootGrid.IsEnabled = true;
             rootGrid.Background = new SolidColorBrush(Colors.White);
-           
-          //  if (propsnotinDB[block.Name].bCompleted)
-           block.bActive = true;
-           block.bnMinuteWarningSent = false;
+            startBlock = DateTime.Now;
+            //  if (propsnotinDB[block.Name].bCompleted)
+            block.state = (int)states.active;
+            block.bnMinuteWarningSent = false;
             block.bWorkNotFinishedinTime = false;
             timer.Stop();
             timer.Interval = TimeSpan.FromSeconds(1);
@@ -828,29 +874,59 @@ namespace formEditor
             //   passwordEntered.IsEnabled = true;
 
         }
-
-        private void Timer_Tick(object sender, EventArgs e)
+        void CheckforCompletion(Block blok)
         {
+            int answered = 0;
+           
+            foreach (FormEntry line in blok.questions)
+            {
+                List<itemResponse> resp = responses.Where(r => r.linenum == line.linenum && r.Name == blok.Name).ToList();
+                if (resp.Count > 0)
+                   answered += 1;
+                
+            }
+            if (answered == blok.questions.Count)
+            {
+                blok.state = (int)states.done;
+            }
+        }
+    private void Timer_Tick(object sender, EventArgs e)
+        {
+            if (((App)Application.Current).activeUser != null)
+            {
+                IdleTime += 1;
+                if (IdleTime > idletimeout * 60)
+                {
+                    Login.Content = "Login";
+                    Add.Visibility = Visibility.Collapsed;
+                    Configure.Visibility = Visibility.Collapsed;
+                    UserAdmin.Visibility = Visibility.Collapsed;
+                    ((App)Application.Current).activeUser = null;
+                    Start.IsEnabled = false;
+                }
+            }
             //look for first block that did not start in time
-            
             foreach (Block blok in blocks)
             {
                 //each block of work has an expected start time and if it is passed then imform the managers
                 TimeSpan expected = blok.ExpectedStart;
                 DateTime now = DateTime.Now;
                 DateTime eTime = new DateTime(now.Year, now.Month, now.Day, expected.Hours, expected.Minutes, 0);
-                if (DateTime.Now > eTime && !blok.bExpectedMessageSent && !blok.bActive)
-                {
-                    TextManager(blok, "did not start in time");
-                    blok.bExpectedMessageSent = true;
-                    return;
-                }
+                //if (instanceStart < eTime)  //should never need this check as program should not be stopped
+                //{
+                    if (DateTime.Now > eTime && !blok.bExpectedMessageSent && blok.state != (int)states.done)
+                    {
+                        TextManager(blok, "did not start in time");
+                        blok.bExpectedMessageSent = true;
+                        return;
+                    }
+                //}
             }
             //now look for blocks that did not complate in time
             foreach (Block blok in blocks)
             {
                 
-                if (blok.bActive)
+                if (blok.state == (int)states.active)
                 {
                     //clock ran out tell manager
                     if (blok.TimeLefttoComplete == 0 && !blok.bWorkNotFinishedinTime)
@@ -886,7 +962,7 @@ namespace formEditor
                         blok.bnMinuteWarningSent = true;
                         return;
                     }
-                    CheckForFinish(blok);
+                  //  CheckForFinish(blok);
                 }
 
             }
@@ -903,7 +979,7 @@ namespace formEditor
                 //tell manager that the current block has finished
                 TextManager(blok, "finished in time");
                 currentBlockIndex += 1;
-                blok.bActive = false;
+                blok.state = (int)states.done;
                 blockinfo.SelectedIndex = currentBlockIndex;
                 //if finished last block we are done for day
                 if (currentBlockIndex == blocks.Count)
@@ -916,16 +992,19 @@ namespace formEditor
                     UserAdmin.Visibility = Visibility.Collapsed;
                     ((App)Application.Current).activeUser = null;
                     Start.IsEnabled = false;
+                    timer.Stop();
+                    timer.Interval = TimeSpan.FromSeconds(60);
+                    timer.Start();
                     Refresh();
                     return;
                 }
 
                 //set next block as active but do not start timer
                 selectedBlock = blocks[currentBlockIndex];
-                blok.bActive =false;
+                blok.state = (int)states.done;
                
                 timeElapsed = 0;
-                Start.Visibility = Visibility.Visible;
+              
                 itemNumber = -1;
           //      Progress.Value = 0;
                 Refresh();
@@ -945,9 +1024,9 @@ namespace formEditor
                 return;
             selectedBlock = blocks[currentBlockIndex];
             Start.Content = "Start";
-            if (selectedBlock.bActive)
+            if (selectedBlock.state ==  (int)states.active)
                 Start.Content = "Resume";
-            Start.Visibility = Visibility.Visible;
+           
             itemNumber = -1;
             Refresh();
             rootGrid.IsEnabled = false;
@@ -1046,7 +1125,7 @@ namespace formEditor
                 EnableSsl = true
             };
 
-            smptClient.Send(senderEmailId, phonenum, "OTS", message);
+           smptClient.Send(senderEmailId, phonenum, "OTS", message);
 
 
 
@@ -1058,7 +1137,8 @@ namespace formEditor
             if (lab.Contains("Logout"))   // logging out
             {
                 Login.Content = "Login";
-                
+                Add.Visibility = Visibility.Collapsed;
+                Configure.Visibility = Visibility.Collapsed;
                 UserAdmin.Visibility = Visibility.Collapsed;
                 ((App)Application.Current).activeUser = null;
                 Start.IsEnabled = false;
@@ -1074,7 +1154,8 @@ namespace formEditor
                // logout.Visibility = Visibility.Visible;
                 rootGrid.IsEnabled = true;
                 bEntryMode = false;
-                Start.IsEnabled = false;
+                Start.IsEnabled = true;
+                Start.Visibility = Visibility.Visible;
                 
             }
             else
@@ -1097,7 +1178,7 @@ namespace formEditor
     {
         public int lastLineNumber { get; set; }
         public double TimeLeft  { get; set; }
-        public bool bActive { get; set; }
+        
       
     }
    

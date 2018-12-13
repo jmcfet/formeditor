@@ -144,8 +144,21 @@
     <Compile Include="Migrations\201812091919064_movecompletionfagstoblock.Designer.cs">
       <DependentUpon>201812091919064_movecompletionfagstoblock.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201812102123169_additemresponse.cs" />
+    <Compile Include="Migrations\201812102123169_additemresponse.Designer.cs">
+      <DependentUpon>201812102123169_additemresponse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201812102131544_addusertoitemresponse.cs" />
+    <Compile Include="Migrations\201812102131544_addusertoitemresponse.Designer.cs">
+      <DependentUpon>201812102131544_addusertoitemresponse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201812112119284_addstate.cs" />
+    <Compile Include="Migrations\201812112119284_addstate.Designer.cs">
+      <DependentUpon>201812112119284_addstate.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Block.cs" />
+    <Compile Include="Models\ItemResponse.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="SharedCode.cs" />
     <Page Include="Admin.xaml">
@@ -249,6 +262,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201812091919064_movecompletionfagstoblock.resx">
       <DependentUpon>201812091919064_movecompletionfagstoblock.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201812102123169_additemresponse.resx">
+      <DependentUpon>201812102123169_additemresponse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201812102131544_addusertoitemresponse.resx">
+      <DependentUpon>201812102131544_addusertoitemresponse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201812112119284_addstate.resx">
+      <DependentUpon>201812112119284_addstate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
