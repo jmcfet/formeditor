@@ -10,11 +10,13 @@ namespace formEditor.Models
     public class Block : INotifyPropertyChanged
     {
         string name;
+        string description;
         double timeLefttoComplete;
         int currentItem;
         bool selected;
         bool warning;
         bool timedOut;
+        int state { get; set; }
         public int Id { get; set; }
         public string Name
         {
@@ -26,14 +28,28 @@ namespace formEditor.Models
             }
         }
        
-        public string Description { get; set; }
+        public string Description {
+            get { return description; }
+            set
+            {
+                description = value;
+                NotifyPropertyChanged("Description");
+            }
+        }
         public double timer { get; set; }
         public TimeSpan ExpectedStart { get; set; }
         public bool bExpectedMessageSent { get; set; }
         public bool bWorkNotFinishedinTime { get; set; }
         public bool bnMinuteWarningSent { get; set; }
         public bool bActive { get; set; }
-        public int  state { get; set; }
+        public int  State {
+            get { return state; }
+            set
+            {
+                state = value;
+                NotifyPropertyChanged("State");
+            }
+        }
         public double TimeLefttoComplete
         {
             get { return timeLefttoComplete; }

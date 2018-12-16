@@ -39,11 +39,11 @@
             <StackPanel Orientation="Horizontal"  Grid.Row="0">
                 <Button Content="Login" Height="30" x:Name="Login" Width="100" Margin="10,0,0,0" Click="Login_Click" />
                 <Button Content="User Admin" Height="30" x:Name="UserAdmin" Width="70" Margin="10,0,0,0" Click="UserAdmin_Click"   Visibility="Hidden" />
-                <Button Content="Start"  x:Name="Start"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Start_Click"/>
+                <Button Content="Start"  x:Name="Start"  Width="77" Margin="10,0,0,0" Visibility="Hidden" IsEnabled="False"  Click="Start_Click"/>
 
                 <Button Content="Add"  x:Name="Add"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Add_Click"/>
                 <Button Content="Config"  x:Name="Configure"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="Configure_Click"/>
-                <Button Content="Logout"  x:Name="logout"  Width="77" Margin="10,0,0,0" Visibility="Hidden"  Click="logout_Click"/>
+                
                 <!--<Button Content="{Binding ReClassifyButtonText}" Height="40" Name="ReClassify" Visibility="Collapsed" Width="88" Click="Reclassify_click" />
             <Button Content="{Binding QuickReClassifyButtonText}" Height="40" Name="QuickReClassify" Visibility="Collapsed" Width="120" Click="QickClassify_Click"/>
             <Button Content="{Binding BatchButtonText}" Height="40" Name="BatchBCS" Visibility="Collapsed" Width="120" Click="BatchBCS_Click"/>-->
@@ -125,7 +125,7 @@
                             <DataTrigger Binding="{Binding Path = 'TimedOut'}" Value="True">
                                 <Setter Property="Background" Value="Red"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Path = 'state'}" Value="2">
+                            <DataTrigger Binding="{Binding Path = 'State'}" Value="2">
                                 <Setter Property="IsEnabled" Value="False"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Path = 'Warning'}" Value="True">
@@ -142,7 +142,7 @@
                             <StackPanel Orientation="Vertical">
 
                                 <TextBlock HorizontalAlignment="Center" Height="Auto" TextWrapping="Wrap" 
-                                    Text="{Binding Name}" 
+                                    Text="{Binding Description}" 
                                     VerticalAlignment="Center" MinWidth="90" FontSize="30" FontWeight="DemiBold" Foreground="#FF09099B" 
                                     Margin="5,3"  TextAlignment="Center" />
                                 <TextBlock HorizontalAlignment="Center" Height="Auto" TextWrapping="Wrap" 
